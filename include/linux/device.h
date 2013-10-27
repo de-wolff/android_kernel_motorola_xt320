@@ -21,6 +21,7 @@
 #include <linux/compiler.h>
 #include <linux/types.h>
 #include <linux/module.h>
+#include <linux/iommu.h>
 #include <linux/pm.h>
 #include <asm/atomic.h>
 #include <asm/device.h>
@@ -63,7 +64,7 @@ struct bus_type {
 	int (*resume)(struct device *dev);
 
 	const struct dev_pm_ops *pm;
-
+	struct iommu_ops *iommu_ops;
 	struct subsys_private *p;
 };
 

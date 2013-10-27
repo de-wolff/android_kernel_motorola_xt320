@@ -11,6 +11,7 @@
  *
  */
 
+#include <linux/module.h>
 #include <linux/debugfs.h>
 
 #include "kgsl.h"
@@ -79,4 +80,9 @@ void kgsl_device_debugfs_init(struct kgsl_device *device)
 void kgsl_core_debugfs_init(void)
 {
 	kgsl_debugfs_dir = debugfs_create_dir("kgsl", 0);
+}
+
+void kgsl_core_debugfs_close(void)
+{
+	debugfs_remove_recursive(kgsl_debugfs_dir);
 }

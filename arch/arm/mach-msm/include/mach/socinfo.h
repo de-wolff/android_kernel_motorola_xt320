@@ -224,4 +224,19 @@ static inline int cpu_is_fsm9xxx(void)
 	return cpu == FSM_CPU_9XXX;
 }
 
+static inline int cpu_is_msm7x25ab(void)
+{
+	return 0;
+}
+
+static inline int cpu_is_msm8625(void)
+{
+	return 0;
+}
+
+static inline int cpu_is_msm8930(void)
+{
+	return 0;
+}
+
 #endif

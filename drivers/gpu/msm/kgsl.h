@@ -1,29 +1,13 @@
-/* Copyright (c) 2008-2011, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2008-2012, Code Aurora Forum. All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are
- * met:
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimer in the documentation and/or other materials provided
- *       with the distribution.
- *     * Neither the name of Code Aurora Forum, Inc. nor the names of its
- *       contributors may be used to endorse or promote products derived
- *       from this software without specific prior written permission.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
  *
- * THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
  */
 #ifndef __KGSL_H
@@ -37,16 +21,22 @@
 #include <linux/mutex.h>
 #include <linux/cdev.h>
 #include <linux/regulator/consumer.h>
+#include <linux/mm.h>
+
+#include <mach/kgsl.h>
 
 #define KGSL_NAME "kgsl"
 
-/* Flags to control whether to flush or invalidate a cached memory range */
-#define KGSL_CACHE_INV		0x00000000
-#define KGSL_CACHE_CLEAN	0x00000001
-#define KGSL_CACHE_FLUSH	0x00000002
+/* The number of memstore arrays limits the number of contexts allowed.
+ * If more contexts are needed, update multiple for MEMSTORE_SIZE
+ */
+#define KGSL_MEMSTORE_SIZE	((int)(PAGE_SIZE * 2))
+#define KGSL_MEMSTORE_GLOBAL	(0)
+#define KGSL_MEMSTORE_MAX	(KGSL_MEMSTORE_SIZE / \
+		sizeof(struct kgsl_devmemstore) - 1)
 
-#define KGSL_CACHE_USER_ADDR	0x00000010
-#define KGSL_CACHE_VMALLOC_ADDR	0x00000020
+/* Timestamp window used to detect rollovers (half of integer range) */
+#define KGSL_TIMESTAMP_WINDOW 0x80000000
 
 /*cache coherency ops */
 #define DRM_KGSL_GEM_CACHE_OP_TO_DEV	0x0001
@@ -56,21 +46,13 @@
 #define KGSL_PAGETABLE_ENTRY_SIZE  4
 
 /* Pagetable Virtual Address base */
-#define KGSL_PAGETABLE_BASE	0x66000000
+#define KGSL_PAGETABLE_BASE	0x10000000
 
 /* Extra accounting entries needed in the pagetable */
 #define KGSL_PT_EXTRA_ENTRIES      16
 
 #define KGSL_PAGETABLE_ENTRIES(_sz) (((_sz) >> PAGE_SHIFT) + \
 				     KGSL_PT_EXTRA_ENTRIES)
-
-#ifdef CONFIG_MSM_KGSL_MMU
-#define KGSL_PAGETABLE_SIZE \
-ALIGN(KGSL_PAGETABLE_ENTRIES(CONFIG_MSM_KGSL_PAGE_TABLE_SIZE) * \
-KGSL_PAGETABLE_ENTRY_SIZE, PAGE_SIZE)
-#else
-#define KGSL_PAGETABLE_SIZE 0
-#endif
 
 #ifdef CONFIG_KGSL_PER_PROCESS_PAGE_TABLE
 #define KGSL_PAGETABLE_COUNT (CONFIG_MSM_KGSL_PAGE_TABLE_COUNT)
@@ -91,15 +73,6 @@ KGSL_PAGETABLE_ENTRY_SIZE, PAGE_SIZE)
 
 struct kgsl_device;
 
-struct kgsl_ptpool {
-	size_t ptsize;
-	struct mutex lock;
-	struct list_head list;
-	int entries;
-	int static_entries;
-	int chunks;
-};
-
 struct kgsl_driver {
 	struct cdev cdev;
 	dev_t major;
@@ -110,8 +83,6 @@ struct kgsl_driver {
 	struct kobject *ptkobj;
 	struct kobject *prockobj;
 	struct kgsl_device *devp[KGSL_DEVICE_MAX];
-
-	uint32_t flags_debug;
 
 	/* Global lilst of open processes */
 	struct list_head process_list;
@@ -125,11 +96,13 @@ struct kgsl_driver {
 	/* Mutex for protecting the device list */
 	struct mutex devlock;
 
-	struct kgsl_ptpool ptpool;
+	void *ptpool;
 
 	struct {
 		unsigned int vmalloc;
 		unsigned int vmalloc_max;
+		unsigned int page_alloc;
+		unsigned int page_alloc_max;
 		unsigned int coherent;
 		unsigned int coherent_max;
 		unsigned int mapped;
@@ -140,11 +113,18 @@ struct kgsl_driver {
 
 extern struct kgsl_driver kgsl_driver;
 
-#define KGSL_USER_MEMORY 1
-#define KGSL_MAPPED_MEMORY 2
-
 struct kgsl_pagetable;
-struct kgsl_memdesc_ops;
+struct kgsl_memdesc;
+
+struct kgsl_memdesc_ops {
+	int (*vmflags)(struct kgsl_memdesc *);
+	int (*vmfault)(struct kgsl_memdesc *, struct vm_area_struct *,
+		       struct vm_fault *);
+	void (*free)(struct kgsl_memdesc *memdesc);
+	int (*map_kernel_mem)(struct kgsl_memdesc *);
+};
+
+#define KGSL_MEMDESC_GUARD_PAGE BIT(0)
 
 /* shared memory allocation */
 struct kgsl_memdesc {
@@ -154,16 +134,33 @@ struct kgsl_memdesc {
 	unsigned int physaddr;
 	unsigned int size;
 	unsigned int priv;
+	struct scatterlist *sg;
+	unsigned int sglen;
 	struct kgsl_memdesc_ops *ops;
+	int flags;
 };
+
+/* List of different memory entry types */
+
+#define KGSL_MEM_ENTRY_KERNEL 0
+#define KGSL_MEM_ENTRY_PMEM   1
+#define KGSL_MEM_ENTRY_ASHMEM 2
+#define KGSL_MEM_ENTRY_USER   3
+#define KGSL_MEM_ENTRY_ION    4
+#define KGSL_MEM_ENTRY_MAX    5
+
+/* List of flags */
+
+#define KGSL_MEM_ENTRY_FROZEN (1 << 0)
 
 struct kgsl_mem_entry {
 	struct kref refcount;
 	struct kgsl_memdesc memdesc;
 	int memtype;
-	struct file *file_ptr;
-	struct list_head list;
-	uint32_t free_timestamp;
+	int flags;
+	void *priv_data;
+	struct rb_node node;
+	unsigned int context_id;
 	/* back pointer to private structure under whose context this
 	* allocation is made */
 	struct kgsl_process_private *priv;
@@ -176,11 +173,20 @@ struct kgsl_mem_entry {
 #endif
 
 void kgsl_mem_entry_destroy(struct kref *kref);
-uint8_t *kgsl_gpuaddr_to_vaddr(const struct kgsl_memdesc *memdesc,
-	unsigned int gpuaddr, unsigned int *size);
+
+struct kgsl_mem_entry *kgsl_get_mem_entry(unsigned int ptbase,
+		unsigned int gpuaddr, unsigned int size);
+
 struct kgsl_mem_entry *kgsl_sharedmem_find_region(
 	struct kgsl_process_private *private, unsigned int gpuaddr,
 	size_t size);
+
+int kgsl_add_event(struct kgsl_device *device, u32 id, u32 ts,
+	void (*cb)(struct kgsl_device *, void *, u32, u32), void *priv,
+	void *owner);
+
+void kgsl_cancel_events(struct kgsl_device *device,
+	void *owner);
 
 extern const struct dev_pm_ops kgsl_pm_ops;
 
@@ -193,7 +199,6 @@ void kgsl_late_resume_driver(struct early_suspend *h);
 #ifdef CONFIG_MSM_KGSL_DRM
 extern int kgsl_drm_init(struct platform_device *dev);
 extern void kgsl_drm_exit(void);
-extern void kgsl_gpu_mem_flush(int op);
 #else
 static inline int kgsl_drm_init(struct platform_device *dev)
 {
@@ -206,19 +211,54 @@ static inline void kgsl_drm_exit(void)
 #endif
 
 static inline int kgsl_gpuaddr_in_memdesc(const struct kgsl_memdesc *memdesc,
-				unsigned int gpuaddr)
+				unsigned int gpuaddr, unsigned int size)
 {
-	if (gpuaddr >= memdesc->gpuaddr && (gpuaddr + sizeof(unsigned int)) <=
-		(memdesc->gpuaddr + memdesc->size)) {
+	if (gpuaddr >= memdesc->gpuaddr &&
+	    ((gpuaddr + size) <= (memdesc->gpuaddr + memdesc->size))) {
 		return 1;
 	}
 	return 0;
 }
 
-static inline bool timestamp_cmp(unsigned int new, unsigned int old)
+static inline void *kgsl_memdesc_map(struct kgsl_memdesc *memdesc)
 {
-	int ts_diff = new - old;
-	return (ts_diff >= 0) || (ts_diff < -20000);
+	if (memdesc->hostptr == NULL && memdesc->ops &&
+		memdesc->ops->map_kernel_mem)
+		memdesc->ops->map_kernel_mem(memdesc);
+
+	return memdesc->hostptr;
+}
+
+static inline uint8_t *kgsl_gpuaddr_to_vaddr(struct kgsl_memdesc *memdesc,
+					     unsigned int gpuaddr)
+{
+	void *hostptr = NULL;
+
+	if ((gpuaddr >= memdesc->gpuaddr) &&
+		(gpuaddr < (memdesc->gpuaddr + memdesc->size)))
+		hostptr = kgsl_memdesc_map(memdesc);
+
+	return hostptr != NULL ? hostptr + (gpuaddr - memdesc->gpuaddr) : NULL;
+}
+
+static inline int timestamp_cmp(unsigned int a, unsigned int b)
+{
+	/* check for equal */
+	if (a == b)
+		return 0;
+
+	/* check for greater-than for non-rollover case */
+	if ((a > b) && (a - b < KGSL_TIMESTAMP_WINDOW))
+		return 1;
+
+	/* check for greater-than for rollover case
+	 * note that <= is required to ensure that consistent
+	 * results are returned for values whose difference is
+	 * equal to the window size
+	 */
+	a += KGSL_TIMESTAMP_WINDOW;
+	b += KGSL_TIMESTAMP_WINDOW;
+	return ((a > b) && (a - b <= KGSL_TIMESTAMP_WINDOW)) ? 1 : -1;
 }
 
 static inline void

@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2011, Code Aurora Forum. All rights reserved.
+/* Copyright (c) 2010-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -15,16 +15,14 @@
 
 #include <linux/interrupt.h>
 #include <linux/clk.h>
+#include <linux/regulator/consumer.h>
+#include <mach/socinfo.h>
 
-/* Sharability attributes of MSM IOMMU mappings */
-#define MSM_IOMMU_ATTR_NON_SH		0x0
-#define MSM_IOMMU_ATTR_SH		0x4
+extern pgprot_t     pgprot_kernel;
+extern struct platform_device *msm_iommu_root_dev;
 
-/* Cacheability attributes of MSM IOMMU mappings */
-#define MSM_IOMMU_ATTR_NONCACHED	0x0
-#define MSM_IOMMU_ATTR_CACHED_WB_WA	0x1
-#define MSM_IOMMU_ATTR_CACHED_WB_NWA	0x2
-#define MSM_IOMMU_ATTR_CACHED_WT	0x3
+/* Domain attributes */
+#define MSM_IOMMU_DOMAIN_PT_CACHEABLE	0x1
 
 /* Mask for the cache policy attribute */
 #define MSM_IOMMU_CP_MASK		0x03
@@ -37,6 +35,9 @@
  */
 #define MAX_NUM_MIDS	32
 
+/* Maximum number of SMT entries allowed by the system */
+#define MAX_NUM_SMR	128
+
 /**
  * struct msm_iommu_dev - a single IOMMU hardware instance
  * name		Human-readable name given to this IOMMU HW instance
@@ -45,6 +46,7 @@
 struct msm_iommu_dev {
 	const char *name;
 	int ncb;
+	int ttbr_split;
 };
 
 /**
@@ -70,17 +72,22 @@ struct msm_iommu_ctx_dev {
  * @irq:	Interrupt number
  * @clk:	The bus clock for this IOMMU hardware instance
  * @pclk:	The clock for the IOMMU bus interconnect
+ * @name:	Human-readable name of this IOMMU device
+ * @gdsc:	Regulator needed to power this HW block (v2 only)
+ * @nsmr:	Size of the SMT on this HW block (v2 only)
  *
  * A msm_iommu_drvdata holds the global driver data about a single piece
  * of an IOMMU hardware instance.
  */
 struct msm_iommu_drvdata {
 	void __iomem *base;
-	int irq;
 	int ncb;
+	int ttbr_split;
 	struct clk *clk;
 	struct clk *pclk;
 	const char *name;
+	struct regulator *gdsc;
+	unsigned int nsmr;
 };
 
 /**
@@ -89,6 +96,10 @@ struct msm_iommu_drvdata {
  * @pdev:		Platform device associated wit this HW instance
  * @attached_elm:	List element for domains to track which devices are
  *			attached to them
+ * @attached_domain	Domain currently attached to this context (if any)
+ * @name		Human-readable name of this context device
+ * @sids		List of Stream IDs mapped to this context (v2 only)
+ * @nsid		Number of Stream IDs mapped to this context (v2 only)
  *
  * A msm_iommu_ctx_drvdata holds the driver data for a single context bank
  * within each IOMMU hardware instance
@@ -97,14 +108,11 @@ struct msm_iommu_ctx_drvdata {
 	int num;
 	struct platform_device *pdev;
 	struct list_head attached_elm;
+	struct iommu_domain *attached_domain;
+	const char *name;
+	u32 sids[MAX_NUM_SMR];
+	unsigned int nsid;
 };
-
-/*
- * Look up an IOMMU context device by its context name. NULL if none found.
- * Useful for testing and drivers that do not yet fully have IOMMU stuff in
- * their platform devices.
- */
-struct device *msm_iommu_get_ctx(const char *ctx_name);
 
 /*
  * Interrupt handler for the IOMMU context fault interrupt. Hooking the
@@ -112,5 +120,43 @@ struct device *msm_iommu_get_ctx(const char *ctx_name);
  * message and dump useful IOMMU registers.
  */
 irqreturn_t msm_iommu_fault_handler(int irq, void *dev_id);
+irqreturn_t msm_iommu_fault_handler_v2(int irq, void *dev_id);
+
+#ifdef CONFIG_MSM_IOMMU
+/*
+ * Look up an IOMMU context device by its context name. NULL if none found.
+ * Useful for testing and drivers that do not yet fully have IOMMU stuff in
+ * their platform devices.
+ */
+struct device *msm_iommu_get_ctx(const char *ctx_name);
+#else
+static inline struct device *msm_iommu_get_ctx(const char *ctx_name)
+{
+	return NULL;
+}
+#endif
 
 #endif
+
+static inline int msm_soc_version_supports_iommu_v1(void)
+{
+#ifdef CONFIG_OF
+	struct device_node *node;
+
+	node = of_find_compatible_node(NULL, NULL, "qcom,msm-smmu-v2");
+	if (node) {
+		of_node_put(node);
+		return 0;
+	}
+#endif
+	if (cpu_is_msm8960() &&
+	    SOCINFO_VERSION_MAJOR(socinfo_get_version()) < 2)
+		return 0;
+
+	if (cpu_is_msm8x60() &&
+	    (SOCINFO_VERSION_MAJOR(socinfo_get_version()) != 2 ||
+	    SOCINFO_VERSION_MINOR(socinfo_get_version()) < 1))	{
+		return 0;
+	}
+	return 1;
+}

@@ -13,7 +13,7 @@
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/dma-mapping.h>
-#include <linux/msm_kgsl.h>
+#include <mach/kgsl.h>
 #include <linux/regulator/machine.h>
 #include <mach/irqs.h>
 #include <mach/msm_iomap.h>
@@ -583,7 +583,10 @@ static struct platform_device msm_lcdc_device = {
 	.name   = "lcdc",
 	.id     = 0,
 };
+struct platform_device mipi_dsi_device;
 
+#define KGSL_3D0_REG_MEMORY "kgsl_3d0_reg_memory" 
+#define KGSL_3D0_IRQ "kgsl_3d0_irq"
 
 static struct resource kgsl_3d0_resources[] = {
 	{
@@ -601,30 +604,27 @@ static struct resource kgsl_3d0_resources[] = {
 };
 
 static struct kgsl_device_platform_data kgsl_3d0_pdata = {
-	.pwr_data = {
-		.pwrlevel = {
-			{
-				.gpu_freq = 200000000,
-				.bus_freq = 200000000,
-			},
+	.pwrlevel = {
+		{
+			.gpu_freq = 245760000,
+			.bus_freq = 200000000,
 		},
-		.init_level = 0,
-		.num_levels = 1,
-		.set_grp_async = NULL,
-		.idle_timeout = HZ/5,
-		.nap_allowed = false,
-	},
-	.clk = {
-		.name = {
-			.clk = "grp_clk",
-			.pclk = "grp_pclk",
+		{
+			.gpu_freq = 192000000,
+			.bus_freq = 160000000,
+		},
+		{
+			.gpu_freq = 133330000,
+			.bus_freq = 0,
 		},
 	},
-	.imem_clk_name = {
-		.clk = "imem_clk",
-		.pclk = NULL,
-	},
-
+	.init_level = 0,
+	.num_levels = 3,
+	.set_grp_async = set_grp_xbar_async,
+	.idle_timeout = HZ,
+	.strtstp_sleepwake = true,
+	.nap_allowed = false,
+	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE | KGSL_CLK_MEM,
 };
 
 struct platform_device msm_kgsl_3d0 = {
@@ -639,11 +639,12 @@ struct platform_device msm_kgsl_3d0 = {
 
 void __init msm7x25a_kgsl_3d0_init(void)
 {
-	if (cpu_is_msm7x25a() || cpu_is_msm7x25aa()) {
-		kgsl_3d0_pdata.pwr_data.pwrlevel[0].gpu_freq = 133330000;
-		kgsl_3d0_pdata.pwr_data.pwrlevel[0].bus_freq = 160000000;
-		kgsl_3d0_pdata.pwr_data.pwrlevel[1].gpu_freq = 96000000;
-		kgsl_3d0_pdata.pwr_data.pwrlevel[1].bus_freq = 0;
+	if (cpu_is_msm7x25a() || cpu_is_msm7x25aa() || cpu_is_msm7x25ab()) {
+		kgsl_3d0_pdata.num_levels = 2;
+		kgsl_3d0_pdata.pwrlevel[0].gpu_freq = 133330000;
+		kgsl_3d0_pdata.pwrlevel[0].bus_freq = 160000000;
+		kgsl_3d0_pdata.pwrlevel[1].gpu_freq = 96000000;
+		kgsl_3d0_pdata.pwrlevel[1].bus_freq = 0;
 	}
 }
 
