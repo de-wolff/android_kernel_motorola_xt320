@@ -501,7 +501,7 @@ static int do_ip_setsockopt(struct sock *sk, int level,
 		if (optlen > 40)
 			goto e_inval;
 		err = ip_options_get_from_user(sock_net(sk), &opt,
-					       optval, optlen);
+					       (unsigned char *) optval, optlen);
 		if (err)
 			break;
 		if (inet->is_icsk) {
@@ -948,7 +948,7 @@ mc_msf_out:
 		err = -EPERM;
 		if (!capable(CAP_NET_ADMIN))
 			break;
-		err = xfrm_user_policy(sk, optname, optval, optlen);
+		err = xfrm_user_policy(sk, optname, (unsigned char *)optval, optlen);
 		break;
 
 	case IP_TRANSPARENT:

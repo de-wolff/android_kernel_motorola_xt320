@@ -591,7 +591,7 @@ static void create_eir(struct hci_dev *hdev, u8 *data)
 	struct list_head *p;
 	size_t name_len;
 
-	name_len = strlen(hdev->dev_name);
+	name_len = strlen((const char *)hdev->dev_name);
 
 	if (name_len > 0) {
 		/* EIR Data type */

@@ -360,7 +360,7 @@ retry:
 		return 0;
 
 	spin_lock(&proc_inum_lock);
-	error = ida_get_new(&proc_inum_ida, &i);
+	error = ida_get_new(&proc_inum_ida, (int *)&i);
 	spin_unlock(&proc_inum_lock);
 	if (error == -EAGAIN)
 		goto retry;

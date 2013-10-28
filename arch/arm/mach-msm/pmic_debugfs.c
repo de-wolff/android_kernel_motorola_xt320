@@ -220,7 +220,7 @@ static int debug_rtc_get_alarm_time(char *buf, int size)
 }
 static int debug_rtc_get_alarm_status(char *buf, int size)
 {
-	int	status;;
+	unsigned int	status;;
 
 	if (pmic_rtc_get_alarm_status(&status) < 0)
 		return -EFAULT;
@@ -247,7 +247,7 @@ static int debug_rtc_set_time_adjust(char *buf, int size)
 
 static int debug_rtc_get_time_adjust(char *buf, int size)
 {
-	int	adjust;;
+	unsigned int	adjust;;
 
 	if (pmic_rtc_get_time_adjust(&adjust) < 0)
 		return -EFAULT;
@@ -369,7 +369,7 @@ static int debug_mic_en(char *buf, int size)
 
 static int debug_mic_is_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_mic_is_en(&enabled) < 0)
 		return -EFAULT;
@@ -421,7 +421,7 @@ static int debug_spkr_en_right_chan(char *buf, int size)
 
 static int debug_spkr_is_right_chan_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_right_chan_en(&enabled) < 0)
 		return -EFAULT;
@@ -430,7 +430,7 @@ static int debug_spkr_is_right_chan_en(char *buf, int size)
 }
 static int debug_spkr_en_left_chan(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -446,7 +446,7 @@ static int debug_spkr_en_left_chan(char *buf, int size)
 
 static int debug_spkr_is_left_chan_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_left_chan_en(&enabled) < 0)
 		return -EFAULT;
@@ -576,7 +576,7 @@ static int debug_spkr_add_right_left_chan(char *buf, int size)
 
 static int debug_spkr_is_right_left_chan_added(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_right_left_chan_added(&enabled) < 0)
 		return -EFAULT;
@@ -586,7 +586,7 @@ static int debug_spkr_is_right_left_chan_added(char *buf, int size)
 
 static int debug_spkr_en_stereo(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -601,7 +601,7 @@ static int debug_spkr_en_stereo(char *buf, int size)
 }
 static int debug_spkr_is_stereo_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_stereo_en(&enabled) < 0)
 		return -EFAULT;
@@ -611,7 +611,7 @@ static int debug_spkr_is_stereo_en(char *buf, int size)
 
 static int debug_spkr_select_usb_with_hpf_20hz(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -626,7 +626,7 @@ static int debug_spkr_select_usb_with_hpf_20hz(char *buf, int size)
 }
 static int debug_spkr_is_usb_with_hpf_20hz(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_usb_with_hpf_20hz(&enabled) < 0)
 		return -EFAULT;
@@ -636,7 +636,7 @@ static int debug_spkr_is_usb_with_hpf_20hz(char *buf, int size)
 
 static int debug_spkr_bypass_mux(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -651,7 +651,7 @@ static int debug_spkr_bypass_mux(char *buf, int size)
 }
 static int debug_spkr_is_mux_bypassed(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_mux_bypassed(&enabled) < 0)
 		return -EFAULT;
@@ -661,7 +661,7 @@ static int debug_spkr_is_mux_bypassed(char *buf, int size)
 
 static int debug_spkr_en_hpf(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -676,7 +676,7 @@ static int debug_spkr_en_hpf(char *buf, int size)
 }
 static int debug_spkr_is_hpf_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_hpf_en(&enabled) < 0)
 		return -EFAULT;
@@ -686,7 +686,7 @@ static int debug_spkr_is_hpf_en(char *buf, int size)
 
 static int debug_spkr_en_sink_curr_from_ref_volt_cir(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -702,7 +702,7 @@ static int debug_spkr_en_sink_curr_from_ref_volt_cir(char *buf, int size)
 
 static int debug_spkr_is_sink_curr_from_ref_volt_cir_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_sink_curr_from_ref_volt_cir_en(&enabled) < 0)
 		return -EFAULT;
@@ -758,7 +758,7 @@ static int debug_vib_mot_set_polarity(char *buf, int size)
 }
 static int debug_vid_en(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -773,7 +773,7 @@ static int debug_vid_en(char *buf, int size)
 }
 static int debug_vid_is_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_vid_is_en(&enabled) < 0)
 		return -EFAULT;
@@ -783,7 +783,7 @@ static int debug_vid_is_en(char *buf, int size)
 
 static int debug_vid_load_detect_en(char *buf, int size)
 {
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d", &enable);
@@ -805,7 +805,7 @@ static enum spkr_left_right debug_spkr_left_right = LEFT_SPKR;
 static int debug_spkr_en(char *buf, int size)
 {
 	int	left_right;
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d %d", &left_right, &enable);
@@ -822,7 +822,7 @@ static int debug_spkr_en(char *buf, int size)
 
 static int debug_spkr_is_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_en(debug_spkr_left_right, &enabled) < 0)
 		return -EFAULT;
@@ -833,7 +833,7 @@ static int debug_spkr_is_en(char *buf, int size)
 static int debug_spkr_set_gain(char *buf, int size)
 {
 	int	left_right;
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d %d", &left_right, &enable);
@@ -888,7 +888,7 @@ static int debug_spkr_get_delay(char *buf, int size)
 static int debug_spkr_en_mute(char *buf, int size)
 {
 	int	left_right;
-	int	enable;
+	unsigned int	enable;
 	int	cnt;
 
 	cnt = sscanf(buf, "%d %d", &left_right, &enable);
@@ -905,7 +905,7 @@ static int debug_spkr_en_mute(char *buf, int size)
 
 static int debug_spkr_is_mute_en(char *buf, int size)
 {
-	int	enabled;
+	unsigned int	enabled;
 
 	if (pmic_spkr_is_mute_en(debug_spkr_left_right, &enabled) < 0)
 		return -EFAULT;

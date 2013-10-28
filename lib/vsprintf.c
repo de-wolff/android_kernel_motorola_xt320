@@ -730,9 +730,9 @@ char *ip6_addr_string(char *buf, char *end, const u8 *addr,
 	char ip6_addr[sizeof("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:255.255.255.255")];
 
 	if (fmt[0] == 'I' && fmt[2] == 'c')
-		ip6_compressed_string(ip6_addr, addr);
+		ip6_compressed_string(ip6_addr, (const char *)addr);
 	else
-		ip6_string(ip6_addr, addr, fmt);
+		ip6_string(ip6_addr, (const char *)addr, fmt);
 
 	return string(buf, end, ip6_addr, spec);
 }

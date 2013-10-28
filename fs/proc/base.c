@@ -1881,9 +1881,9 @@ static int proc_fill_cache(struct file *filp, void *dirent, filldir_t filldir,
 	ino_t ino = 0;
 	unsigned type = DT_UNKNOWN;
 
-	qname.name = name;
+	qname.name = (unsigned char *)name;
 	qname.len  = len;
-	qname.hash = full_name_hash(name, len);
+	qname.hash = full_name_hash((unsigned char *)name, len);
 
 	child = d_lookup(dir, &qname);
 	if (!child) {
@@ -1915,7 +1915,7 @@ end_instantiate:
 
 static unsigned name_to_int(struct dentry *dentry)
 {
-	const char *name = dentry->d_name.name;
+	const char *name = (const char *)dentry->d_name.name;
 	int len = dentry->d_name.len;
 	unsigned n = 0;
 
@@ -2908,7 +2908,7 @@ static void proc_flush_task_mnt(struct vfsmount *mnt, pid_t pid, pid_t tgid)
 	char buf[PROC_NUMBUF];
 	struct qstr name;
 
-	name.name = buf;
+	name.name = (unsigned char *)buf;
 	name.len = snprintf(buf, sizeof(buf), "%d", pid);
 	dentry = d_hash_and_lookup(mnt->mnt_root, &name);
 	if (dentry) {
@@ -2917,19 +2917,19 @@ static void proc_flush_task_mnt(struct vfsmount *mnt, pid_t pid, pid_t tgid)
 		dput(dentry);
 	}
 
-	name.name = buf;
+	name.name = (unsigned char *)buf;
 	name.len = snprintf(buf, sizeof(buf), "%d", tgid);
 	leader = d_hash_and_lookup(mnt->mnt_root, &name);
 	if (!leader)
 		goto out;
 
-	name.name = "task";
-	name.len = strlen(name.name);
+	name.name = (unsigned char *)"task";
+	name.len = strlen((const char *)name.name);
 	dir = d_hash_and_lookup(leader, &name);
 	if (!dir)
 		goto out_put_leader;
 
-	name.name = buf;
+	name.name = (unsigned char *)buf;
 	name.len = snprintf(buf, sizeof(buf), "%d", pid);
 	dentry = d_hash_and_lookup(dir, &name);
 	if (dentry) {

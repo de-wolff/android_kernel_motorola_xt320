@@ -160,7 +160,7 @@ static int mip6_destopt_output(struct xfrm_state *x, struct sk_buff *skb)
 	dstopt = (struct ipv6_destopt_hdr *)skb_transport_header(skb);
 	dstopt->nexthdr = nexthdr;
 
-	hao = mip6_padn((char *)(dstopt + 1),
+	hao = mip6_padn((unsigned char *)(dstopt + 1),
 			calc_padlen(sizeof(*dstopt), 6));
 
 	hao->type = IPV6_TLV_HAO;

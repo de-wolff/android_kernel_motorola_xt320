@@ -151,7 +151,7 @@ static void adreno_dump_regs(struct kgsl_device *device,
 				kgsl_regread(device, offset+i, regvals+i);
 
 			hex_dump_to_buffer(regvals, linelen*4, 32, 4,
-				linebuf, sizeof(linebuf), 0);
+				(char *)linebuf, sizeof(linebuf), 0);
 			KGSL_LOG_DUMP(device,
 				"REG: %5.5X: %s\n", offset, linebuf);
 		}
@@ -286,9 +286,9 @@ static void adreno_dump_rb(struct kgsl_device *device, const void *buf,
 
 		if (adreno_rb_use_hex())
 			hex_dump_to_buffer(ptr+i, linelen*4, rowsize*4, 4,
-				linebuf, sizeof(linebuf), 0);
+				(char *)linebuf, sizeof(linebuf), 0);
 		else
-			adreno_dump_rb_buffer(ptr+i, linelen, linebuf,
+			adreno_dump_rb_buffer(ptr+i, linelen, (char *)linebuf,
 				sizeof(linebuf), &args);
 		KGSL_LOG_DUMP(device,
 			"RB: %4.4X:%s\n", (start+i)%size, linebuf);
@@ -854,16 +854,16 @@ static int adreno_dump(struct kgsl_device *device)
 	/* Dump the registers if the user asked for it */
 	if (is_adreno_pm_regs_enabled()) {
 		if (adreno_is_a20x(adreno_dev))
-			adreno_dump_regs(device, a200_registers,
+			adreno_dump_regs(device, (void *)a200_registers,
 					a200_registers_count);
 		else if (adreno_is_a22x(adreno_dev))
-			adreno_dump_regs(device, a220_registers,
+			adreno_dump_regs(device, (void *)a220_registers,
 					a220_registers_count);
 		else if (adreno_is_a225(adreno_dev))
-			adreno_dump_regs(device, a225_registers,
+			adreno_dump_regs(device, (void *)a225_registers,
 				a225_registers_count);
 		else if (adreno_is_a3xx(adreno_dev))
-			adreno_dump_regs(device, a3xx_registers,
+			adreno_dump_regs(device, (void *)a3xx_registers,
 					a3xx_registers_count);
 	}
 

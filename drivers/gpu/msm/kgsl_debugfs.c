@@ -33,7 +33,7 @@ static inline int kgsl_log_set(unsigned int *log_val, void *data, u64 val)
 static int __log ## _set(void *data, u64 val)           \
 {                                                       \
 	struct kgsl_device *device = data;              \
-	return kgsl_log_set(&device->__log, data, val); \
+	return kgsl_log_set((unsigned int *)&device->__log, data, val); \
 }                                                       \
 static int __log ## _get(void *data, u64 *val)	        \
 {                                                       \

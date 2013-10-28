@@ -156,8 +156,8 @@ static int snapshot_os(struct kgsl_device *device,
 	header->state = hang ? SNAPSHOT_STATE_HUNG : SNAPSHOT_STATE_RUNNING;
 
 	/* Get the kernel build information */
-	strlcpy(header->release, utsname()->release, sizeof(header->release));
-	strlcpy(header->version, utsname()->version, sizeof(header->version));
+	strlcpy((char *)header->release, (const char *)utsname()->release, sizeof(header->release));
+	strlcpy((char *)header->version, (const char *)utsname()->version, sizeof(header->version));
 
 	/* Get the Unix time for the timestamp */
 	header->seconds = get_seconds();
@@ -180,7 +180,7 @@ static int snapshot_os(struct kgsl_device *device,
 	task = find_task_by_vpid(pid);
 
 	if (task)
-		get_task_comm(header->comm, task);
+		get_task_comm((char *)header->comm, task);
 
 	header->ctxtcount = ctxtcount;
 

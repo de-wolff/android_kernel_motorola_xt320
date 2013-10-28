@@ -1360,7 +1360,7 @@ static int fuse_notify_inval_entry(struct fuse_conn *fc, unsigned int size,
 	if (outarg.namelen > FUSE_NAME_MAX)
 		goto err;
 
-	name.name = buf;
+	name.name = (const unsigned char *)buf;
 	name.len = outarg.namelen;
 	err = fuse_copy_one(cs, buf, outarg.namelen + 1);
 	if (err)

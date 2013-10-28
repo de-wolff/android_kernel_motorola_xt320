@@ -302,7 +302,7 @@ static int msm_fb_probe(struct platform_device *pdev)
 		msm_fb_pdata = pdev->dev.platform_data;
 		fbram_size =
 			pdev->resource[0].end - pdev->resource[0].start + 1;
-		fbram_phys = (char *)pdev->resource[0].start;
+		fbram_phys = (unsigned char *)pdev->resource[0].start;
 		fbram = __va(fbram_phys);
 
 		if (!fbram) {
@@ -1116,7 +1116,7 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
 		return -ENOMEM;
 	}
 
-	fbi->screen_base = fbram;
+	fbi->screen_base = (char *)fbram;
 	fbi->fix.smem_start = (unsigned long)fbram_phys;
 
 	memset(fbi->screen_base, 0x0, fix->smem_len);

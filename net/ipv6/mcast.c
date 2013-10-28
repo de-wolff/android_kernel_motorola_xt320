@@ -673,7 +673,7 @@ static void igmp6_group_added(struct ifmcaddr6 *mc)
 	if (!(mc->mca_flags&MAF_LOADED)) {
 		mc->mca_flags |= MAF_LOADED;
 		if (ndisc_mc_map(&mc->mca_addr, buf, dev, 0) == 0)
-			dev_mc_add(dev, buf);
+			dev_mc_add(dev, (unsigned char *)buf);
 	}
 	spin_unlock_bh(&mc->mca_lock);
 
@@ -699,7 +699,7 @@ static void igmp6_group_dropped(struct ifmcaddr6 *mc)
 	if (mc->mca_flags&MAF_LOADED) {
 		mc->mca_flags &= ~MAF_LOADED;
 		if (ndisc_mc_map(&mc->mca_addr, buf, dev, 0) == 0)
-			dev_mc_del(dev, buf);
+			dev_mc_del(dev, (unsigned char *)buf);
 	}
 
 	if (mc->mca_flags & MAF_NOREPORT)

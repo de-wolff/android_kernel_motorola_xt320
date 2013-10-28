@@ -51,14 +51,14 @@ struct diag_hdlc_dest_type enc = { NULL, NULL, 0 };
 #define ENCODE_RSP_AND_SEND(buf_length)				\
 do {									\
 	send.state = DIAG_STATE_START;					\
-	send.pkt = driver->apps_rsp_buf;				\
+	send.pkt = (void *)driver->apps_rsp_buf;				\
 	send.last = (void *)(driver->apps_rsp_buf + buf_length);	\
 	send.terminate = 1;						\
 	if (!driver->in_busy_1) {					\
-		enc.dest = driver->buf_in_1;				\
+		enc.dest = (void *)driver->buf_in_1;				\
 		enc.dest_last = (void *)(driver->buf_in_1 + 499);	\
 		diag_hdlc_encode(&send, &enc);				\
-		driver->write_ptr_1->buf = driver->buf_in_1;		\
+		driver->write_ptr_1->buf = (void *)driver->buf_in_1;		\
 		driver->write_ptr_1->length = (int)(enc.dest - \
 						(void *)(driver->buf_in_1)); \
 		usb_diag_write(driver->legacy_ch, driver->write_ptr_1);	\
@@ -992,7 +992,7 @@ int diagfwd_disconnect(void)
 
 int diagfwd_write_complete(struct diag_request *diag_write_ptr)
 {
-	unsigned char *buf = diag_write_ptr->buf;
+	unsigned char *buf = (unsigned char *)diag_write_ptr->buf;
 	/*Determine if the write complete is for data from modem/apps/q6 */
 	/* Need a context variable here instead */
 	if (buf == (void *)driver->buf_in_1) {
@@ -1037,7 +1037,7 @@ int diagfwd_write_complete(struct diag_request *diag_write_ptr)
 int diagfwd_read_complete(struct diag_request *diag_read_ptr)
 {
 	int status = diag_read_ptr->status;
-	unsigned char *buf = diag_read_ptr->buf;
+	unsigned char *buf = (unsigned char *)diag_read_ptr->buf;
 
 	/* Determine if the read complete is for data on legacy/mdm ch */
 	if (buf == (void *)driver->usb_buf_out) {
@@ -1078,7 +1078,7 @@ int diagfwd_read_complete(struct diag_request *diag_read_ptr)
 void diag_read_work_fn(struct work_struct *work)
 {
 	APPEND_DEBUG('d');
-	driver->usb_read_ptr->buf = driver->usb_buf_out;
+	driver->usb_read_ptr->buf = (void *)driver->usb_buf_out;
 	driver->usb_read_ptr->length = USB_MAX_OUT_BUF;
 	usb_diag_read(driver->legacy_ch, driver->usb_read_ptr);
 	APPEND_DEBUG('e');

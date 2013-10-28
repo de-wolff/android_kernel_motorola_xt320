@@ -215,14 +215,14 @@ static int ping_mdm_data_cb_register_arg(struct msm_rpc_client *client,
 					 struct msm_rpc_xdr *xdr, void *data)
 {
 	struct ping_mdm_register_data_cb_arg *arg = data;
-	int cb_id;
+	unsigned int cb_id;
 
 	cb_id = msm_rpc_add_cb_func(client, (void *)arg->cb_func);
 	if ((cb_id < 0) && (cb_id != MSM_RPC_CLIENT_NULL_CB_ID))
 		return cb_id;
 
 	xdr_send_uint32(xdr, &cb_id);                /* cb_id */
-	xdr_send_uint32(xdr, &arg->num);             /* num */
+	xdr_send_uint32(xdr, (unsigned int *)&arg->num);             /* num */
 	xdr_send_uint32(xdr, &arg->size);            /* size */
 	xdr_send_uint32(xdr, &arg->interval_ms);     /* interval_ms */
 	xdr_send_uint32(xdr, &arg->num_tasks);       /* num_tasks */
@@ -234,7 +234,7 @@ static int ping_mdm_data_cb_unregister_arg(struct msm_rpc_client *client,
 					   struct msm_rpc_xdr *xdr, void *data)
 {
 	struct ping_mdm_unregister_data_cb_arg *arg = data;
-	int cb_id;
+	unsigned int cb_id;
 
 	cb_id = msm_rpc_add_cb_func(client, (void *)arg->cb_func);
 	if ((cb_id < 0) && (cb_id != MSM_RPC_CLIENT_NULL_CB_ID))
@@ -342,14 +342,14 @@ static int ping_mdm_register_arg(struct msm_rpc_client *client,
 				 struct msm_rpc_xdr *xdr, void *data)
 {
 	struct ping_mdm_register_arg *arg = data;
-	int cb_id;
+	unsigned int cb_id;
 
 	cb_id = msm_rpc_add_cb_func(client, (void *)arg->cb_func);
 	if ((cb_id < 0) && (cb_id != MSM_RPC_CLIENT_NULL_CB_ID))
 		return cb_id;
 
 	xdr_send_uint32(xdr, &cb_id);             /* cb_id */
-	xdr_send_uint32(xdr, &arg->num);          /* num */
+	xdr_send_uint32(xdr, (unsigned int *)&arg->num);          /* num */
 
 	return 0;
 }
@@ -358,7 +358,7 @@ static int ping_mdm_unregister_arg(struct msm_rpc_client *client,
 				   struct msm_rpc_xdr *xdr, void *data)
 {
 	struct ping_mdm_unregister_arg *arg = data;
-	int cb_id;
+	unsigned int cb_id;
 
 	cb_id = msm_rpc_add_cb_func(client, (void *)arg->cb_func);
 	if ((cb_id < 0) && (cb_id != MSM_RPC_CLIENT_NULL_CB_ID))
@@ -738,7 +738,7 @@ static ssize_t ping_test_read(struct file *fp, char __user *buf,
 static ssize_t ping_test_write(struct file *fp, const char __user *buf,
 			 size_t count, loff_t *pos)
 {
-	unsigned char cmd[64];
+	char cmd[64];
 	int len;
 
 	if (count < 1)

@@ -897,7 +897,7 @@ static int send_prio_char(struct tty_struct *tty, char ch)
 
 	if (was_stopped)
 		start_tty(tty);
-	tty->ops->write(tty, &ch, 1);
+	tty->ops->write(tty, (unsigned char *)&ch, 1);
 	if (was_stopped)
 		stop_tty(tty);
 	tty_write_unlock(tty);

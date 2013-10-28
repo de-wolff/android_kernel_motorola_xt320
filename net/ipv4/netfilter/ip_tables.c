@@ -105,7 +105,7 @@ ip_packet_match(const struct iphdr *ip,
 		return false;
 	}
 
-	ret = ifname_compare_aligned(indev, ipinfo->iniface, ipinfo->iniface_mask);
+	ret = ifname_compare_aligned(indev, ipinfo->iniface, (const char *)ipinfo->iniface_mask);
 
 	if (FWINV(ret != 0, IPT_INV_VIA_IN)) {
 		dprintf("VIA in mismatch (%s vs %s).%s\n",
@@ -114,7 +114,7 @@ ip_packet_match(const struct iphdr *ip,
 		return false;
 	}
 
-	ret = ifname_compare_aligned(outdev, ipinfo->outiface, ipinfo->outiface_mask);
+	ret = ifname_compare_aligned(outdev, ipinfo->outiface, (const char *)ipinfo->outiface_mask);
 
 	if (FWINV(ret != 0, IPT_INV_VIA_OUT)) {
 		dprintf("VIA out mismatch (%s vs %s).%s\n",
@@ -234,7 +234,7 @@ get_chainname_rulenum(const struct ipt_entry *s, const struct ipt_entry *e,
 
 	if (strcmp(t->target.u.kernel.target->name, XT_ERROR_TARGET) == 0) {
 		/* Head of user chain: ERROR target with chainname */
-		*chainname = t->target.data;
+		*chainname = (const char *)t->target.data;
 		(*rulenum) = 0;
 	} else if (s == e) {
 		(*rulenum)++;

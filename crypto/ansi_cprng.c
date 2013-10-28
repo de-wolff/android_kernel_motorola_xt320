@@ -188,7 +188,7 @@ static int _get_more_prng_bytes(struct prng_context *ctx, int cont_test)
 static int get_prng_bytes(char *buf, size_t nbytes, struct prng_context *ctx,
 				int do_cont_test)
 {
-	unsigned char *ptr = buf;
+	unsigned char *ptr = (unsigned char *)buf;
 	unsigned int byte_count = (unsigned int)nbytes;
 	int err;
 
@@ -354,7 +354,7 @@ static int cprng_get_random(struct crypto_rng *tfm, u8 *rdata,
 {
 	struct prng_context *prng = crypto_rng_ctx(tfm);
 
-	return get_prng_bytes(rdata, dlen, prng, 0);
+	return get_prng_bytes((char *)rdata, dlen, prng, 0);
 }
 
 /*

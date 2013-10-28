@@ -92,7 +92,7 @@ struct smem_log_item {
 
 static remote_spinlock_t remote_spinlock;
 static remote_spinlock_t remote_spinlock_static;
-static uint32_t smem_log_enable;
+static int smem_log_enable;
 static int smem_log_initialized;
 
 module_param_named(log_enable, smem_log_enable, int,
@@ -1163,7 +1163,7 @@ static struct miscdevice smem_log_dev = {
 #define EVENTS_PRINT_SIZE \
 (SMEM_LOG_ITEM_PRINT_SIZE * SMEM_LOG_NUM_ENTRIES)
 
-static uint32_t smem_log_timeout_ms;
+static int smem_log_timeout_ms;
 module_param_named(timeout_ms, smem_log_timeout_ms,
 		   int, S_IRUGO | S_IWUSR | S_IWGRP);
 

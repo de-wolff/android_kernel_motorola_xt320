@@ -50,7 +50,7 @@ static char *chstate(unsigned n)
 static int debug_modem_err_crash(char *buf, int max)
 {
 	char *x;
-	int size;
+	unsigned int size;
 	int i = 0;
 
 	x = smem_get_entry(SMEM_ERR_CRASH_LOG, &size);
@@ -65,7 +65,7 @@ static int debug_modem_err_crash(char *buf, int max)
 static int debug_modem_err_trace(char *buf, int max)
 {
 	char *x;
-	int size;
+	unsigned int size;
 	int i = 0;
 
 	x = smem_get_entry(SMEM_ERR_F3_TRACE_LOG, &size);
@@ -519,7 +519,7 @@ static void debug_create(const char *name, mode_t mode,
 
 static int __init smd_debugfs_init(void)
 {
-	int size;
+	unsigned int size;
 	struct dentry *dent;
 
 	dent = debugfs_create_dir("smd", 0);

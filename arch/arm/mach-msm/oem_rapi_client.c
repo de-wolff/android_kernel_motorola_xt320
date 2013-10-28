@@ -133,7 +133,7 @@ static int oem_rapi_client_streaming_function_arg(struct msm_rpc_client *client,
 		return cb_id;
 
 	xdr_send_uint32(xdr, &arg->event);                /* enum */
-	xdr_send_uint32(xdr, &cb_id);                     /* cb_id */
+	xdr_send_uint32(xdr, (uint32_t *)&cb_id);                     /* cb_id */
 	xdr_send_uint32(xdr, (uint32_t *)(&arg->handle)); /* handle */
 	xdr_send_uint32(xdr, &arg->in_len);               /* in_len */
 	xdr_send_bytes(xdr, (const void **)&arg->input,
@@ -255,7 +255,7 @@ static ssize_t debug_write(struct file *fp, const char __user *buf,
 	struct oem_rapi_client_streaming_func_arg arg;
 	struct oem_rapi_client_streaming_func_ret ret;
 
-	unsigned char cmd[64];
+	char cmd[64];
 	int len;
 
 	if (count < 1)

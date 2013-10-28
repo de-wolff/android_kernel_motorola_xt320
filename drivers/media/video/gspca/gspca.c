@@ -1460,7 +1460,7 @@ static int vidioc_enum_input(struct file *file, void *priv,
 		return -EINVAL;
 	input->type = V4L2_INPUT_TYPE_CAMERA;
 	input->status = gspca_dev->cam.input_flags;
-	strncpy(input->name, gspca_dev->sd_desc->name,
+	strncpy((char *)input->name, gspca_dev->sd_desc->name,
 		sizeof input->name);
 	return 0;
 }

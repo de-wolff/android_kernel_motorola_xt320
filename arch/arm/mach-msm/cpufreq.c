@@ -92,7 +92,7 @@ static int msm_cpufreq_target(struct cpufreq_policy *policy,
 				unsigned int relation)
 {
 	int ret = -EFAULT;
-	int index;
+	unsigned int index;
 	struct cpufreq_frequency_table *table;
 #ifdef CONFIG_SMP
 	struct cpufreq_work_struct *cpu_work = NULL;
@@ -169,7 +169,7 @@ static int msm_cpufreq_verify(struct cpufreq_policy *policy)
 static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 {
 	int cur_freq;
-	int index;
+	unsigned int index;
 	struct cpufreq_frequency_table *table;
 #ifdef CONFIG_SMP
 	struct cpufreq_work_struct *cpu_work = NULL;

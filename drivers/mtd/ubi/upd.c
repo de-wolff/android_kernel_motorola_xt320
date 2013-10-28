@@ -102,7 +102,7 @@ static int clear_update_marker(struct ubi_device *ubi, struct ubi_volume *vol,
 		vol->corrupted = 0;
 		vol->used_bytes = bytes;
 		vol->used_ebs = div_u64_rem(bytes, vol->usable_leb_size,
-					    &vol->last_eb_bytes);
+					    (u32 *)&vol->last_eb_bytes);
 		if (vol->last_eb_bytes)
 			vol->used_ebs += 1;
 		else
@@ -290,7 +290,7 @@ int ubi_more_update_data(struct ubi_device *ubi, struct ubi_volume *vol,
 	if (ubi->ro_mode)
 		return -EROFS;
 
-	lnum = div_u64_rem(vol->upd_received,  vol->usable_leb_size, &offs);
+	lnum = div_u64_rem(vol->upd_received,  vol->usable_leb_size, (u32 *)&offs);
 	if (vol->upd_received + count > vol->upd_bytes)
 		to_write = count = vol->upd_bytes - vol->upd_received;
 

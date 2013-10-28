@@ -245,7 +245,7 @@ int cfg80211_mgd_wext_siwap(struct net_device *dev,
 {
 	struct wireless_dev *wdev = dev->ieee80211_ptr;
 	struct cfg80211_registered_device *rdev = wiphy_to_dev(wdev->wiphy);
-	u8 *bssid = ap_addr->sa_data;
+	u8 *bssid = (u8 *)ap_addr->sa_data;
 	int err;
 
 	/* call only for station! */
@@ -322,7 +322,7 @@ int cfg80211_wext_siwgenie(struct net_device *dev,
 {
 	struct wireless_dev *wdev = dev->ieee80211_ptr;
 	struct cfg80211_registered_device *rdev = wiphy_to_dev(wdev->wiphy);
-	u8 *ie = extra;
+	u8 *ie = (u8 *)extra;
 	int ie_len = data->length, err;
 
 	if (wdev->iftype != NL80211_IFTYPE_STATION)

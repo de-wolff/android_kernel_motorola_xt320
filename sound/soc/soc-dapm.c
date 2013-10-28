@@ -578,11 +578,11 @@ static int dapm_connect_mixer(struct snd_soc_dapm_context *dapm,
 
 	/* search for mixer kcontrol */
 	for (i = 0; i < dest->num_kcontrols; i++) {
-		if (!strcmp(control_name, dest->kcontrols[i].name)) {
+		if (!strcmp(control_name, (const char *)dest->kcontrols[i].name)) {
 			list_add(&path->list, &dapm->card->paths);
 			list_add(&path->list_sink, &dest->sources);
 			list_add(&path->list_source, &src->sinks);
-			path->name = dest->kcontrols[i].name;
+			path->name = (char *)dest->kcontrols[i].name;
 			dapm_set_path_status(dest, path, i);
 			return 0;
 		}
@@ -653,7 +653,7 @@ static int dapm_new_mixer(struct snd_soc_dapm_context *dapm,
 			 * for dapm_mixer_named_ctl this is simply the
 			 * kcontrol name.
 			 */
-			name_len = strlen(w->kcontrols[i].name) + 1;
+			name_len = strlen((const char *)w->kcontrols[i].name) + 1;
 			if (w->id != snd_soc_dapm_mixer_named_ctl)
 				name_len += 1 + strlen(w->name);
 

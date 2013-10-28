@@ -449,7 +449,7 @@ int cfg80211_ibss_wext_siwap(struct net_device *dev,
 {
 	struct wireless_dev *wdev = dev->ieee80211_ptr;
 	struct cfg80211_registered_device *rdev = wiphy_to_dev(wdev->wiphy);
-	u8 *bssid = ap_addr->sa_data;
+	u8 *bssid = (u8 *)ap_addr->sa_data;
 	int err;
 
 	/* call only for ibss! */

@@ -83,7 +83,7 @@ static void dcc_poll_locked(void)
 		);
 		if (rch >= 0) {
 			ch = rch;
-			tty_insert_flip_string(g_dcc_tty, &ch, 1);
+			tty_insert_flip_string(g_dcc_tty, (unsigned char *)&ch, 1);
 			tty_flip_buffer_push(g_dcc_tty);
 		}
 	}
@@ -232,7 +232,7 @@ static enum hrtimer_restart dcc_tty_timer_func(struct hrtimer *timer)
 void dcc_console_write(struct console *co, const char *b, unsigned count)
 {
 #if 1
-	dcc_write(b, count);
+	dcc_write((const unsigned char *)b, count);
 #else
 	/* blocking printk */
 	while (count > 0) {

@@ -49,7 +49,7 @@ static bool event_compare(struct fsnotify_event *old, struct fsnotify_event *new
 			 * allowed to look at the inode any more, only thing
 			 * left to check was if the file_name is the same */
 			if (!old->name_len ||
-			    !strcmp(old->file_name, new->file_name))
+			    !strcmp((const char *)old->file_name, (const char *)new->file_name))
 				return true;
 			break;
 		case (FSNOTIFY_EVENT_PATH):

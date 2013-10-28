@@ -302,7 +302,7 @@ static int do_output_char(unsigned char c, struct tty_struct *tty, int space)
 			if (space < 2)
 				return -1;
 			tty->canon_column = tty->column = 0;
-			tty->ops->write(tty, "\r\n", 2);
+			tty->ops->write(tty, (unsigned char *)"\r\n", 2);
 			return 2;
 		}
 		tty->canon_column = tty->column;
@@ -324,7 +324,7 @@ static int do_output_char(unsigned char c, struct tty_struct *tty, int space)
 			if (space < spaces)
 				return -1;
 			tty->column += spaces;
-			tty->ops->write(tty, "        ", spaces);
+			tty->ops->write(tty, (unsigned char *)"        ", spaces);
 			return spaces;
 		}
 		tty->column += spaces;
@@ -1634,7 +1634,7 @@ static int copy_from_read_buf(struct tty_struct *tty,
 	if (n) {
 		retval = copy_to_user(*b, &tty->read_buf[tty->read_tail], n);
 		n -= retval;
-		tty_audit_add_data(tty, &tty->read_buf[tty->read_tail], n);
+		tty_audit_add_data(tty, (unsigned char *)&tty->read_buf[tty->read_tail], n);
 		spin_lock_irqsave(&tty->read_lock, flags);
 		tty->read_tail = (tty->read_tail + n) & (N_TTY_BUF_SIZE-1);
 		tty->read_cnt -= n;

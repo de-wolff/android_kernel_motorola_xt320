@@ -73,7 +73,7 @@ static int get_key_haup_common(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw,
 	int start, range, toggle, dev, code, ircode;
 
 	/* poll IR chip */
-	if (size != i2c_master_recv(ir->c, buf, size))
+	if (size != i2c_master_recv(ir->c, (char *)buf, size))
 		return -EIO;
 
 	/* split rc5 data block ... */
@@ -137,7 +137,7 @@ static int get_key_haup_xvr(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 	 * this added, we get far saner remote behavior with z8 chips on usb
 	 * connected devices, even with the default polling interval of 100ms.
 	 */
-	ret = i2c_master_send(ir->c, buf, 1);
+	ret = i2c_master_send(ir->c, (char *)buf, 1);
 	if (ret != 1)
 		return (ret < 0) ? ret : -EINVAL;
 
@@ -149,7 +149,7 @@ static int get_key_pixelview(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 	unsigned char b;
 
 	/* poll IR chip */
-	if (1 != i2c_master_recv(ir->c, &b, 1)) {
+	if (1 != i2c_master_recv(ir->c, (char *)&b, 1)) {
 		dprintk(1,"read error\n");
 		return -EIO;
 	}
@@ -163,7 +163,7 @@ static int get_key_fusionhdtv(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 	unsigned char buf[4];
 
 	/* poll IR chip */
-	if (4 != i2c_master_recv(ir->c, buf, 4)) {
+	if (4 != i2c_master_recv(ir->c, (char *)buf, 4)) {
 		dprintk(1,"read error\n");
 		return -EIO;
 	}
@@ -187,7 +187,7 @@ static int get_key_knc1(struct IR_i2c *ir, u32 *ir_key, u32 *ir_raw)
 	unsigned char b;
 
 	/* poll IR chip */
-	if (1 != i2c_master_recv(ir->c, &b, 1)) {
+	if (1 != i2c_master_recv(ir->c, (char *)&b, 1)) {
 		dprintk(1,"read error\n");
 		return -EIO;
 	}

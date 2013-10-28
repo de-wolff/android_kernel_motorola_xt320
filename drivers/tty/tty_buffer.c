@@ -347,7 +347,7 @@ int tty_prepare_flip_string(struct tty_struct *tty, unsigned char **chars,
 	int space = tty_buffer_request_room(tty, size);
 	if (likely(space)) {
 		struct tty_buffer *tb = tty->buf.tail;
-		*chars = tb->char_buf_ptr + tb->used;
+		*chars = (unsigned char *)(tb->char_buf_ptr + tb->used);
 		memset(tb->flag_buf_ptr + tb->used, TTY_NORMAL, space);
 		tb->used += space;
 	}
@@ -377,8 +377,8 @@ int tty_prepare_flip_string_flags(struct tty_struct *tty,
 	int space = tty_buffer_request_room(tty, size);
 	if (likely(space)) {
 		struct tty_buffer *tb = tty->buf.tail;
-		*chars = tb->char_buf_ptr + tb->used;
-		*flags = tb->flag_buf_ptr + tb->used;
+		*chars = (unsigned char *)(tb->char_buf_ptr + tb->used);
+		*flags = (char *)(tb->flag_buf_ptr + tb->used);
 		tb->used += space;
 	}
 	return space;
@@ -452,8 +452,8 @@ static void flush_to_ldisc(struct work_struct *work)
 			flag_buf = head->flag_buf_ptr + head->read;
 			head->read += count;
 			spin_unlock_irqrestore(&tty->buf.lock, flags);
-			disc->ops->receive_buf(tty, char_buf,
-							flag_buf, count);
+			disc->ops->receive_buf(tty, (unsigned char *)char_buf,
+							(char *)flag_buf, count);
 			spin_lock_irqsave(&tty->buf.lock, flags);
 		}
 		clear_bit(TTY_FLUSHING, &tty->flags);

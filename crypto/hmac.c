@@ -47,8 +47,8 @@ static int hmac_setkey(struct crypto_shash *parent,
 	int bs = crypto_shash_blocksize(parent);
 	int ds = crypto_shash_digestsize(parent);
 	int ss = crypto_shash_statesize(parent);
-	char *ipad = crypto_shash_ctx_aligned(parent);
-	char *opad = ipad + ss;
+	unsigned char *ipad = crypto_shash_ctx_aligned(parent);
+	unsigned char *opad = ipad + ss;
 	struct hmac_ctx *ctx = align_ptr(opad + ss,
 					 crypto_tfm_ctx_alignment());
 	struct crypto_shash *hash = ctx->hash;
@@ -65,7 +65,7 @@ static int hmac_setkey(struct crypto_shash *parent,
 	if (keylen > bs) {
 		int err;
 
-		err = crypto_shash_digest(&desc.shash, inkey, keylen, ipad);
+		err = crypto_shash_digest(&desc.shash, inkey, (int)keylen, ipad);
 		if (err)
 			return err;
 

@@ -186,10 +186,10 @@ kgsl_process_init_sysfs(struct kgsl_process_private *private)
 	unsigned char name[16];
 	int i, ret;
 
-	snprintf(name, sizeof(name), "%d", private->pid);
+	snprintf((char *)name, sizeof(name), "%d", private->pid);
 
 	if (kobject_init_and_add(&private->kobj, &ktype_mem_entry,
-		kgsl_driver.prockobj, name))
+		kgsl_driver.prockobj, (char *)name))
 		return;
 
 	for (i = 0; i < ARRAY_SIZE(mem_stats); i++) {

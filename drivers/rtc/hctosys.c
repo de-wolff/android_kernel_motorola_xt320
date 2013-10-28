@@ -54,7 +54,7 @@ int rtc_hctosys(void)
 		goto err_invalid;
 	}
 
-	rtc_tm_to_time(&tm, &tv.tv_sec);
+	rtc_tm_to_time(&tm, (unsigned long *)&tv.tv_sec);
 
 	do_settimeofday(&tv);
 

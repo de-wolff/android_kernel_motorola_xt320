@@ -399,7 +399,7 @@ static int packet_rcv_spkt(struct sk_buff *skb, struct net_device *dev,
 	 */
 
 	spkt->spkt_family = dev->type;
-	strlcpy(spkt->spkt_device, dev->name, sizeof(spkt->spkt_device));
+	strlcpy((char *)spkt->spkt_device, dev->name, sizeof(spkt->spkt_device));
 	spkt->spkt_protocol = skb->protocol;
 
 	/*
@@ -451,7 +451,7 @@ static int packet_sendmsg_spkt(struct kiocb *iocb, struct socket *sock,
 	saddr->spkt_device[13] = 0;
 retry:
 	rcu_read_lock();
-	dev = dev_get_by_name_rcu(sock_net(sk), saddr->spkt_device);
+	dev = dev_get_by_name_rcu(sock_net(sk), (const char *)saddr->spkt_device);
 	err = -ENODEV;
 	if (dev == NULL)
 		goto out_unlock;

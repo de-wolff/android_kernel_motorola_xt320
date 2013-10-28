@@ -171,7 +171,7 @@ static struct pppox_sock *__get_item(struct pppoe_net *pn, __be16 sid,
 
 	ret = pn->hash_table[hash];
 	while (ret) {
-		if (cmp_addr(&ret->pppoe_pa, sid, addr) &&
+		if (cmp_addr(&ret->pppoe_pa, sid, (char *)addr) &&
 		    ret->pppoe_ifindex == ifindex)
 			return ret;
 
@@ -204,7 +204,7 @@ static int __set_item(struct pppoe_net *pn, struct pppox_sock *po)
 static struct pppox_sock *__delete_item(struct pppoe_net *pn, __be16 sid,
 					char *addr, int ifindex)
 {
-	int hash = hash_item(sid, addr);
+	int hash = hash_item(sid, (unsigned char *)addr);
 	struct pppox_sock *ret, **src;
 
 	ret = pn->hash_table[hash];
@@ -592,7 +592,7 @@ static int pppoe_release(struct socket *sock)
 	 * protect "po" from concurrent updates
 	 * on pppoe_flush_dev
 	 */
-	delete_item(pn, po->pppoe_pa.sid, po->pppoe_pa.remote,
+	delete_item(pn, po->pppoe_pa.sid, (char *)po->pppoe_pa.remote,
 		    po->pppoe_ifindex);
 
 	sock_orphan(sk);
@@ -641,7 +641,7 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		pppox_unbind_sock(sk);
 		pn = pppoe_pernet(sock_net(sk));
 		delete_item(pn, po->pppoe_pa.sid,
-			    po->pppoe_pa.remote, po->pppoe_ifindex);
+			    (char *)po->pppoe_pa.remote, po->pppoe_ifindex);
 		if (po->pppoe_dev) {
 			dev_put(po->pppoe_dev);
 			po->pppoe_dev = NULL;
@@ -687,7 +687,7 @@ static int pppoe_connect(struct socket *sock, struct sockaddr *uservaddr,
 		error = ppp_register_net_channel(dev_net(dev), &po->chan);
 		if (error) {
 			delete_item(pn, po->pppoe_pa.sid,
-				    po->pppoe_pa.remote, po->pppoe_ifindex);
+				    (char *)po->pppoe_pa.remote, po->pppoe_ifindex);
 			goto err_put;
 		}
 
@@ -874,7 +874,7 @@ static int pppoe_sendmsg(struct kiocb *iocb, struct socket *sock,
 	ph = (struct pppoe_hdr *)skb_put(skb, total_len + sizeof(struct pppoe_hdr));
 	start = (char *)&ph->tag[0];
 
-	error = memcpy_fromiovec(start, m->msg_iov, total_len);
+	error = memcpy_fromiovec((unsigned char *)start, m->msg_iov, total_len);
 	if (error < 0) {
 		kfree_skb(skb);
 		goto end;

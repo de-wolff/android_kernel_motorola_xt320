@@ -65,7 +65,7 @@ static s32 wldev_mkiovar(
 {
 	s32 iolen = 0;
 
-	iolen = bcm_mkiovar(iovar_name, param, paramlen, iovar_buf, buflen);
+	iolen = bcm_mkiovar((char *)iovar_name, (char *)param, paramlen, (char *)iovar_buf, buflen);
 	return iolen;
 }
 
@@ -131,7 +131,7 @@ s32 wldev_mkiovar_bsscfg(
 	const s8 *iovar_name, s8 *param, s32 paramlen,
 	s8 *iovar_buf, s32 buflen, s32 bssidx)
 {
-	const s8 *prefix = "bsscfg:";
+	const s8 *prefix = (const s8 *)"bsscfg:";
 	s8 *p;
 	u32 prefixlen;
 	u32 namelen;
@@ -142,8 +142,8 @@ s32 wldev_mkiovar_bsscfg(
 			(s8 *) iovar_buf, buflen);
 	}
 
-	prefixlen = (u32) strlen(prefix); /* lengh of bsscfg prefix */
-	namelen = (u32) strlen(iovar_name) + 1; /* lengh of iovar  name + null */
+	prefixlen = (u32) strlen((const char *)prefix); /* lengh of bsscfg prefix */
+	namelen = (u32) strlen((const char *)iovar_name) + 1; /* lengh of iovar  name + null */
 	iolen = prefixlen + namelen + sizeof(u32) + paramlen;
 
 	if (buflen < 0 || iolen > (u32)buflen)
@@ -308,7 +308,7 @@ int wldev_set_country(
 	if (!country_code)
 		return error;
 
-	error = wldev_iovar_getbuf(dev, "country", &cspec, sizeof(cspec),
+	error = wldev_iovar_getbuf(dev, (s8 *)"country", &cspec, sizeof(cspec),
 		smbuf, sizeof(smbuf));
 	if (error < 0)
 		DHD_ERROR(("%s: get country failed = %d\n", __FUNCTION__, error));
@@ -327,7 +327,7 @@ int wldev_set_country(
 	memcpy(cspec.country_abbrev, country_code, WLC_CNTRY_BUF_SZ);
 	memcpy(cspec.ccode, country_code, WLC_CNTRY_BUF_SZ);
 	get_customized_country_code((char *)&cspec.country_abbrev, &cspec);
-	error = wldev_iovar_setbuf(dev, "country", &cspec, sizeof(cspec),
+	error = wldev_iovar_setbuf(dev, (s8 *)"country", &cspec, sizeof(cspec),
 		smbuf, sizeof(smbuf));
 	if (error < 0) {
 		DHD_ERROR(("%s: set country for %s as %s rev %d failed\n",

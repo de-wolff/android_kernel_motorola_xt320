@@ -221,7 +221,7 @@ int shash_ahash_update(struct ahash_request *req, struct shash_desc *desc)
 
 	for (nbytes = crypto_hash_walk_first(req, &walk); nbytes > 0;
 	     nbytes = crypto_hash_walk_done(&walk, nbytes))
-		nbytes = crypto_shash_update(desc, walk.data, nbytes);
+		nbytes = crypto_shash_update(desc, (const unsigned char *)walk.data, nbytes);
 
 	return nbytes;
 }
@@ -248,9 +248,9 @@ int shash_ahash_finup(struct ahash_request *req, struct shash_desc *desc)
 
 	do {
 		nbytes = crypto_hash_walk_last(&walk) ?
-			 crypto_shash_finup(desc, walk.data, nbytes,
+			 crypto_shash_finup(desc, (const unsigned char *)walk.data, nbytes,
 					    req->result) :
-			 crypto_shash_update(desc, walk.data, nbytes);
+			 crypto_shash_update(desc, (const unsigned char *)walk.data, nbytes);
 		nbytes = crypto_hash_walk_done(&walk, nbytes);
 	} while (nbytes > 0);
 
@@ -393,7 +393,7 @@ static int shash_compat_update(struct hash_desc *hdesc, struct scatterlist *sg,
 
 	for (nbytes = crypto_hash_walk_first_compat(hdesc, &walk, sg, len);
 	     nbytes > 0; nbytes = crypto_hash_walk_done(&walk, nbytes))
-		nbytes = crypto_shash_update(desc, walk.data, nbytes);
+		nbytes = crypto_shash_update(desc, (const unsigned char *)walk.data, nbytes);
 
 	return nbytes;
 }

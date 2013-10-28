@@ -1080,7 +1080,7 @@ extern int
 sdioh_abort(sdioh_info_t *sd, uint func)
 {
 #if defined(MMC_SDIO_ABORT)
-	char t_func = (char) func;
+	uint8 t_func = (uint8) func;
 #endif /* defined(MMC_SDIO_ABORT) */
 	sd_trace(("%s: Enter\n", __FUNCTION__));
 

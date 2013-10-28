@@ -285,7 +285,7 @@ int eth_mac_addr(struct net_device *dev, void *p)
 
 	if (netif_running(dev))
 		return -EBUSY;
-	if (!is_valid_ether_addr(addr->sa_data))
+	if (!is_valid_ether_addr((unsigned char *)addr->sa_data))
 		return -EADDRNOTAVAIL;
 	memcpy(dev->dev_addr, addr->sa_data, ETH_ALEN);
 	return 0;
@@ -311,7 +311,7 @@ EXPORT_SYMBOL(eth_change_mtu);
 
 int eth_validate_addr(struct net_device *dev)
 {
-	if (!is_valid_ether_addr(dev->dev_addr))
+	if (!is_valid_ether_addr((unsigned char *)dev->dev_addr))
 		return -EADDRNOTAVAIL;
 
 	return 0;

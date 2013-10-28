@@ -1619,7 +1619,7 @@ dhd_txcomplete(dhd_pub_t *dhdp, void *txp, bool success)
 	uint16 type;
 	uint len;
 
-	dhd_prot_hdrpull(dhdp, &ifidx, txp);
+	dhd_prot_hdrpull(dhdp, (int *)&ifidx, txp);
 
 	eh = (struct ether_header *)PKTDATA(dhdp->osh, txp);
 	type  = ntoh16(eh->ether_type);
@@ -4576,7 +4576,7 @@ write_to_file(dhd_pub_t *dhd, uint8 *buf, int size)
 	}
 
 	/* Write buf to file */
-	fp->f_op->write(fp, buf, size, &pos);
+	fp->f_op->write(fp, (const char *)buf, size, &pos);
 
 exit:
 	/* free buf before return */

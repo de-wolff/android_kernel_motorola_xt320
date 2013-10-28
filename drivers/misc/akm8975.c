@@ -95,13 +95,13 @@ static int AKI2C_RxData(char *rxData, int length)
 			.addr = this_client->addr,
 			.flags = 0,
 			.len = 1,
-			.buf = rxData,
+			.buf = (unsigned char *)rxData,
 		},
 		{
 			.addr = this_client->addr,
 			.flags = I2C_M_RD,
 			.len = length,
-			.buf = rxData,
+			.buf = (unsigned char *)rxData,
 		},
 	};
 #if AKM8975_DEBUG_DATA
@@ -144,7 +144,7 @@ static int AKI2C_TxData(char *txData, int length)
 			.addr = this_client->addr,
 			.flags = 0,
 			.len = length,
-			.buf = txData,
+			.buf = (unsigned char *)txData,
 		},
 	};
 #if AKM8975_DEBUG_DATA

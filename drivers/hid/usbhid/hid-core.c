@@ -511,7 +511,7 @@ static void __usbhid_submit_report(struct hid_device *hid, struct hid_report *re
 			hid_warn(hid, "output queueing failed\n");
 			return;
 		}
-		hid_output_report(report, usbhid->out[usbhid->outhead].raw_report);
+		hid_output_report(report, (void *)usbhid->out[usbhid->outhead].raw_report);
 		usbhid->out[usbhid->outhead].report = report;
 		usbhid->outhead = head;
 
@@ -543,7 +543,7 @@ static void __usbhid_submit_report(struct hid_device *hid, struct hid_report *re
 			hid_warn(hid, "control queueing failed\n");
 			return;
 		}
-		hid_output_report(report, usbhid->ctrl[usbhid->ctrlhead].raw_report);
+		hid_output_report(report, (unsigned char *)usbhid->ctrl[usbhid->ctrlhead].raw_report);
 	}
 	usbhid->ctrl[usbhid->ctrlhead].report = report;
 	usbhid->ctrl[usbhid->ctrlhead].dir = dir;
@@ -927,7 +927,7 @@ static int usbhid_parse(struct hid_device *hid)
 		goto err;
 	}
 
-	ret = hid_parse_report(hid, rdesc, rsize);
+	ret = hid_parse_report(hid, (unsigned char *)rdesc, rsize);
 	kfree(rdesc);
 	if (ret) {
 		dbg_hid("parsing report descriptor failed\n");

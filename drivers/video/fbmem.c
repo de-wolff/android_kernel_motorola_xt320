@@ -129,7 +129,7 @@ EXPORT_SYMBOL(fb_pad_unaligned_buffer);
 char* fb_get_buffer_offset(struct fb_info *info, struct fb_pixmap *buf, u32 size)
 {
 	u32 align = buf->buf_align - 1, offset;
-	char *addr = buf->addr;
+	char *addr = (char *)buf->addr;
 
 	/* If IO mapped, we need to sync before access, no sharing of
 	 * the pixmap is done

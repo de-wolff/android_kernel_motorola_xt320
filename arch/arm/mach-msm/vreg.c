@@ -120,7 +120,7 @@ void vreg_put(struct vreg *vreg)
 int vreg_enable(struct vreg *vreg)
 {
 	unsigned id = vreg->id;
-	int enable = VREG_SWITCH_ENABLE;
+	unsigned int enable = VREG_SWITCH_ENABLE;
 
 	if (vreg->refcnt == 0)
 		vreg->status = msm_proc_comm(PCOM_VREG_SWITCH, &id, &enable);
@@ -135,7 +135,7 @@ EXPORT_SYMBOL(vreg_enable);
 int vreg_disable(struct vreg *vreg)
 {
 	unsigned id = vreg->id;
-	int disable = VREG_SWITCH_DISABLE;
+	unsigned int disable = VREG_SWITCH_DISABLE;
 
 	if (!vreg->refcnt)
 		return 0;

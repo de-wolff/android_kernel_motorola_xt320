@@ -200,7 +200,7 @@ EXPORT_SYMBOL(dev_base_lock);
 
 static inline struct hlist_head *dev_name_hash(struct net *net, const char *name)
 {
-	unsigned hash = full_name_hash(name, strnlen(name, IFNAMSIZ));
+	unsigned hash = full_name_hash((unsigned char *)name, strnlen(name, IFNAMSIZ));
 	return &net->dev_name_head[hash_32(hash, NETDEV_HASHBITS)];
 }
 
@@ -4728,7 +4728,7 @@ static int dev_ifsioc(struct net *net, struct ifreq *ifr, unsigned int cmd)
 			return -EINVAL;
 		if (!netif_device_present(dev))
 			return -ENODEV;
-		return dev_mc_add_global(dev, ifr->ifr_hwaddr.sa_data);
+		return dev_mc_add_global(dev, (unsigned char *)ifr->ifr_hwaddr.sa_data);
 
 	case SIOCDELMULTI:
 		if ((!ops->ndo_set_multicast_list && !ops->ndo_set_rx_mode) ||
@@ -4736,7 +4736,7 @@ static int dev_ifsioc(struct net *net, struct ifreq *ifr, unsigned int cmd)
 			return -EINVAL;
 		if (!netif_device_present(dev))
 			return -ENODEV;
-		return dev_mc_del_global(dev, ifr->ifr_hwaddr.sa_data);
+		return dev_mc_del_global(dev, (unsigned char *)ifr->ifr_hwaddr.sa_data);
 
 	case SIOCSIFTXQLEN:
 		if (ifr->ifr_qlen < 0)

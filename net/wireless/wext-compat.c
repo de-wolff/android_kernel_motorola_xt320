@@ -639,7 +639,7 @@ int cfg80211_wext_siwencode(struct net_device *dev,
 	}
 
 	memset(&params, 0, sizeof(params));
-	params.key = keybuf;
+	params.key = (unsigned char *)keybuf;
 	params.key_len = erq->length;
 	if (erq->length == 5)
 		params.cipher = WLAN_CIPHER_SUITE_WEP40;
@@ -723,7 +723,7 @@ int cfg80211_wext_siwencodeext(struct net_device *dev,
 			idx--;
 	}
 
-	addr = ext->addr.sa_data;
+	addr = (u8 *)ext->addr.sa_data;
 	if (is_broadcast_ether_addr(addr))
 		addr = NULL;
 
@@ -1467,7 +1467,7 @@ int cfg80211_wext_siwpmksa(struct net_device *dev,
 	if (wdev->iftype != NL80211_IFTYPE_STATION)
 		return -EINVAL;
 
-	cfg_pmksa.bssid = pmksa->bssid.sa_data;
+	cfg_pmksa.bssid = (u8 *)pmksa->bssid.sa_data;
 	cfg_pmksa.pmkid = pmksa->pmkid;
 
 	switch (pmksa->cmd) {

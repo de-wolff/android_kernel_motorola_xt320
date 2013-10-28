@@ -446,7 +446,7 @@ static int insert_dent(struct ubifs_info *c, int lnum, int offs, int len,
 	r->nm.len = nlen;
 	memcpy(nbuf, name, nlen);
 	nbuf[nlen] = '\0';
-	r->nm.name = nbuf;
+	r->nm.name = (unsigned char *)nbuf;
 	r->flags = (deletion ? REPLAY_DELETION : 0);
 	key_copy(c, key, &r->key);
 
@@ -473,7 +473,7 @@ int ubifs_validate_entry(struct ubifs_info *c,
 	if (le32_to_cpu(dent->ch.len) != nlen + UBIFS_DENT_NODE_SZ + 1 ||
 	    dent->type >= UBIFS_ITYPES_CNT ||
 	    nlen > UBIFS_MAX_NLEN || dent->name[nlen] != 0 ||
-	    strnlen(dent->name, nlen) != nlen ||
+	    strnlen((const char *)dent->name, nlen) != nlen ||
 	    le64_to_cpu(dent->inum) > MAX_INUM) {
 		ubifs_err("bad %s node", key_type == UBIFS_DENT_KEY ?
 			  "directory entry" : "extended attribute entry");
@@ -587,7 +587,7 @@ static int replay_bud(struct ubifs_info *c, int lnum, int offs, int jhead,
 				goto out_dump;
 
 			err = insert_dent(c, lnum, snod->offs, snod->len,
-					  &snod->key, dent->name,
+					  &snod->key, (char *)dent->name,
 					  le16_to_cpu(dent->nlen), snod->sqnum,
 					  !le64_to_cpu(dent->inum), &used);
 			break;

@@ -834,7 +834,7 @@ static void ieee80211_scan_add_ies(struct iw_request_info *info,
 		iwe.cmd = IWEVGENIE;
 		iwe.u.data.length = next - pos;
 		*current_ev = iwe_stream_add_point(info, *current_ev,
-						   end_buf, &iwe, pos);
+						   end_buf, &iwe, (char *)pos);
 
 		pos = next;
 	}
@@ -844,7 +844,7 @@ static void ieee80211_scan_add_ies(struct iw_request_info *info,
 		iwe.cmd = IWEVGENIE;
 		iwe.u.data.length = end - pos;
 		*current_ev = iwe_stream_add_point(info, *current_ev,
-						   end_buf, &iwe, pos);
+						   end_buf, &iwe, (char *)pos);
 	}
 }
 
@@ -943,7 +943,7 @@ ieee80211_bss(struct wiphy *wiphy, struct iw_request_info *info,
 			iwe.u.data.length = ie[1];
 			iwe.u.data.flags = 1;
 			current_ev = iwe_stream_add_point(info, current_ev, end_buf,
-							  &iwe, ie + 2);
+							  &iwe, (char *)(ie + 2));
 			break;
 		case WLAN_EID_MESH_ID:
 			memset(&iwe, 0, sizeof(iwe));
@@ -951,7 +951,7 @@ ieee80211_bss(struct wiphy *wiphy, struct iw_request_info *info,
 			iwe.u.data.length = ie[1];
 			iwe.u.data.flags = 1;
 			current_ev = iwe_stream_add_point(info, current_ev, end_buf,
-							  &iwe, ie + 2);
+							  &iwe, (char *)(ie + 2));
 			break;
 		case WLAN_EID_MESH_CONFIG:
 			ismesh = true;
@@ -963,50 +963,50 @@ ieee80211_bss(struct wiphy *wiphy, struct iw_request_info *info,
 			cfg = ie + 2;
 			memset(&iwe, 0, sizeof(iwe));
 			iwe.cmd = IWEVCUSTOM;
-			sprintf(buf, "Mesh Network Path Selection Protocol ID: "
+			sprintf((char *)buf, "Mesh Network Path Selection Protocol ID: "
 				"0x%02X", cfg[0]);
-			iwe.u.data.length = strlen(buf);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Path Selection Metric ID: 0x%02X",
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Path Selection Metric ID: 0x%02X",
 				cfg[1]);
-			iwe.u.data.length = strlen(buf);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Congestion Control Mode ID: 0x%02X",
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Congestion Control Mode ID: 0x%02X",
 				cfg[2]);
-			iwe.u.data.length = strlen(buf);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Synchronization ID: 0x%02X", cfg[3]);
-			iwe.u.data.length = strlen(buf);
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Synchronization ID: 0x%02X", cfg[3]);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Authentication ID: 0x%02X", cfg[4]);
-			iwe.u.data.length = strlen(buf);
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Authentication ID: 0x%02X", cfg[4]);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Formation Info: 0x%02X", cfg[5]);
-			iwe.u.data.length = strlen(buf);
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Formation Info: 0x%02X", cfg[5]);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
-			sprintf(buf, "Capabilities: 0x%02X", cfg[6]);
-			iwe.u.data.length = strlen(buf);
+							  &iwe, (char *)buf);
+			sprintf((char *)buf, "Capabilities: 0x%02X", cfg[6]);
+			iwe.u.data.length = strlen((const char *)buf);
 			current_ev = iwe_stream_add_point(info, current_ev,
 							  end_buf,
-							  &iwe, buf);
+							  &iwe, (char *)buf);
 			kfree(buf);
 			break;
 		case WLAN_EID_SUPP_RATES:
 		case WLAN_EID_EXT_SUPP_RATES:
 			/* display all supported rates in readable format */
-			p = current_ev + iwe_stream_lcp_len(info);
+			p = (u8 *)(current_ev + iwe_stream_lcp_len(info));
 
 			memset(&iwe, 0, sizeof(iwe));
 			iwe.cmd = SIOCGIWRATE;
@@ -1016,10 +1016,10 @@ ieee80211_bss(struct wiphy *wiphy, struct iw_request_info *info,
 			for (i = 0; i < ie[1]; i++) {
 				iwe.u.bitrate.value =
 					((ie[i + 2] & 0x7f) * 500000);
-				p = iwe_stream_add_value(info, current_ev, p,
+				p = (u8 *)iwe_stream_add_value(info, current_ev, (char *)p,
 						end_buf, &iwe, IW_EV_PARAM_LEN);
 			}
-			current_ev = p;
+			current_ev = (char *)p;
 			break;
 		}
 		rem -= ie[1] + 2;
@@ -1044,17 +1044,17 @@ ieee80211_bss(struct wiphy *wiphy, struct iw_request_info *info,
 	if (buf) {
 		memset(&iwe, 0, sizeof(iwe));
 		iwe.cmd = IWEVCUSTOM;
-		sprintf(buf, "tsf=%016llx", (unsigned long long)(bss->pub.tsf));
-		iwe.u.data.length = strlen(buf);
+		sprintf((char *)buf, "tsf=%016llx", (unsigned long long)(bss->pub.tsf));
+		iwe.u.data.length = strlen((const char *)buf);
 		current_ev = iwe_stream_add_point(info, current_ev, end_buf,
-						  &iwe, buf);
+						  &iwe, (char *)buf);
 		memset(&iwe, 0, sizeof(iwe));
 		iwe.cmd = IWEVCUSTOM;
-		sprintf(buf, " Last beacon: %ums ago",
+		sprintf((char *)buf, " Last beacon: %ums ago",
 			elapsed_jiffies_msecs(bss->ts));
-		iwe.u.data.length = strlen(buf);
+		iwe.u.data.length = strlen((const char *)buf);
 		current_ev = iwe_stream_add_point(info, current_ev,
-						  end_buf, &iwe, buf);
+						  end_buf, &iwe, (char *)buf);
 		kfree(buf);
 	}
 

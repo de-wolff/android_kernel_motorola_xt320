@@ -473,7 +473,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 {
 	int error;
 	struct dentry *dentry = NULL, *trap;
-	const char *old_name;
+	const unsigned char *old_name;
 
 	trap = lock_rename(new_dir, old_dir);
 	/* Source or destination directories don't exist? */
@@ -488,7 +488,7 @@ struct dentry *debugfs_rename(struct dentry *old_dir, struct dentry *old_dentry,
 	if (IS_ERR(dentry) || dentry == trap || dentry->d_inode)
 		goto exit;
 
-	old_name = fsnotify_oldname_init(old_dentry->d_name.name);
+	old_name = fsnotify_oldname_init((const unsigned char *)old_dentry->d_name.name);
 
 	error = simple_rename(old_dir->d_inode, old_dentry, new_dir->d_inode,
 		dentry);

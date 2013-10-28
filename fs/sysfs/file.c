@@ -481,9 +481,9 @@ void sysfs_notify(struct kobject *k, const char *dir, const char *attr)
 		/* Only directories are tagged, so no need to pass
 		 * a tag explicitly.
 		 */
-		sd = sysfs_find_dirent(sd, NULL, dir);
+		sd = sysfs_find_dirent(sd, NULL, (const unsigned char *)dir);
 	if (sd && attr)
-		sd = sysfs_find_dirent(sd, NULL, attr);
+		sd = sysfs_find_dirent(sd, NULL, (const unsigned char *)attr);
 	if (sd)
 		sysfs_notify_dirent(sd);
 
@@ -572,7 +572,7 @@ int sysfs_add_file_to_group(struct kobject *kobj,
 	int error;
 
 	if (group)
-		dir_sd = sysfs_get_dirent(kobj->sd, NULL, group);
+		dir_sd = sysfs_get_dirent(kobj->sd, NULL, (const unsigned char *) group);
 	else
 		dir_sd = sysfs_get(kobj->sd);
 
@@ -603,7 +603,7 @@ int sysfs_chmod_file(struct kobject *kobj, const struct attribute *attr,
 	mutex_lock(&sysfs_mutex);
 
 	rc = -ENOENT;
-	sd = sysfs_find_dirent(kobj->sd, NULL, attr->name);
+	sd = sysfs_find_dirent(kobj->sd, NULL, (const unsigned char *)attr->name);
 	if (!sd)
 		goto out;
 
@@ -650,7 +650,7 @@ void sysfs_remove_file_from_group(struct kobject *kobj,
 	struct sysfs_dirent *dir_sd;
 
 	if (group)
-		dir_sd = sysfs_get_dirent(kobj->sd, NULL, group);
+		dir_sd = sysfs_get_dirent(kobj->sd, NULL, (const unsigned char *)group);
 	else
 		dir_sd = sysfs_get(kobj->sd);
 	if (dir_sd) {

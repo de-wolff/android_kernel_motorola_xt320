@@ -22,7 +22,7 @@
 
 #include <asm/pmu.h>
 
-static volatile long pmu_lock;
+static volatile unsigned long pmu_lock;
 
 static struct platform_device *pmu_devices[ARM_NUM_PMU_DEVICES];
 

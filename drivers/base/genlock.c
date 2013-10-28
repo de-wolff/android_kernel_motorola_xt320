@@ -39,7 +39,6 @@ MODULE_LICENSE("GPL");
 #define GENLOCK_LOG_ERR(fmt, args...) \
 pr_err("genlock: %s: " fmt, __func__, ##args)
 static struct class *genlock_class;
-static int genlock_major;
 
 /* The genlock magic stored in the kernel private data is used to protect
  * against the possibility of user space passing a valid fd to a
@@ -847,14 +846,6 @@ static dev_t genlock_dev;
 
 static int genlock_dev_init(void)
 {
-/*
-	genlock_dev.minor = MISC_DYNAMIC_MINOR;
-	genlock_dev.name = "genlock";
-	genlock_dev.fops = &genlock_dev_fops;
-	genlock_dev.parent = NULL;
-
-	return misc_register(&genlock_dev);
-*/
 	int ret = -ENODEV;
         printk(KERN_ERR "genlock_dev_init() start\n");
 	ret = alloc_chrdev_region(&genlock_dev, 0, 1, "genlock");
@@ -893,14 +884,12 @@ static int genlock_dev_init(void)
          unregister_chrdev_region(genlock_dev, 1);
  
   out_err_1:
- 
-  out_err: 
-         return ret;
+          return ret;
 }
 
 static void genlock_dev_close(void)
 {
-	misc_deregister(&genlock_dev);
+	misc_deregister((void *)&genlock_dev);
 }
 
 module_init(genlock_dev_init);

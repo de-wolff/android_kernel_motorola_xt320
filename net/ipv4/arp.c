@@ -207,13 +207,13 @@ int arp_mc_map(__be32 addr, u8 *haddr, struct net_device *dev, int dir)
 	case ARPHRD_ETHER:
 	case ARPHRD_FDDI:
 	case ARPHRD_IEEE802:
-		ip_eth_mc_map(addr, haddr);
+		ip_eth_mc_map(addr, (char *)haddr);
 		return 0;
 	case ARPHRD_IEEE802_TR:
-		ip_tr_mc_map(addr, haddr);
+		ip_tr_mc_map(addr, (char *)haddr);
 		return 0;
 	case ARPHRD_INFINIBAND:
-		ip_ib_mc_map(addr, dev->broadcast, haddr);
+		ip_ib_mc_map(addr, dev->broadcast, (char *)haddr);
 		return 0;
 	default:
 		if (dir) {
@@ -503,7 +503,7 @@ int arp_find(unsigned char *haddr, struct sk_buff *skb)
 	if (n) {
 		n->used = jiffies;
 		if (n->nud_state & NUD_VALID || neigh_event_send(n, skb) == 0) {
-			neigh_ha_snapshot(haddr, n, dev);
+			neigh_ha_snapshot((char *)haddr, n, dev);
 			neigh_release(n);
 			return 0;
 		}
@@ -1099,8 +1099,8 @@ static int arp_req_set(struct net *net, struct arpreq *r,
 		unsigned state = NUD_STALE;
 		if (r->arp_flags & ATF_PERM)
 			state = NUD_PERMANENT;
-		err = neigh_update(neigh, (r->arp_flags & ATF_COM) ?
-				   r->arp_ha.sa_data : NULL, state,
+		err = neigh_update(neigh, (unsigned char *)((r->arp_flags & ATF_COM) ?
+				   r->arp_ha.sa_data : NULL), state,
 				   NEIGH_UPDATE_F_OVERRIDE |
 				   NEIGH_UPDATE_F_ADMIN);
 		neigh_release(neigh);

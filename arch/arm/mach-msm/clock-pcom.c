@@ -29,7 +29,7 @@
 static int pc_clk_enable(struct clk *clk)
 {
 	int rc;
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 
 	/* Ignore clocks that are always on */
 	if (id == P_EBI1_CLK || id == P_EBI1_FIXED_CLK)
@@ -44,7 +44,7 @@ static int pc_clk_enable(struct clk *clk)
 
 static void pc_clk_disable(struct clk *clk)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 
 	/* Ignore clocks that are always on */
 	if (id == P_EBI1_CLK || id == P_EBI1_FIXED_CLK)
@@ -70,7 +70,7 @@ int pc_clk_reset(unsigned id, enum clk_reset_action action)
 
 static int pc_reset(struct clk *clk, enum clk_reset_action action)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	return pc_clk_reset(id, action);
 }
 
@@ -80,7 +80,7 @@ static int pc_clk_set_rate(struct clk *clk, unsigned rate)
 	 * remote function. So a return value of 0 doesn't necessarily mean
 	 * that the exact rate was set successfully.
 	 */
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	int rc = msm_proc_comm(PCOM_CLKCTL_RPC_SET_RATE, &id, &rate);
 	if (rc < 0)
 		return rc;
@@ -91,7 +91,7 @@ static int pc_clk_set_rate(struct clk *clk, unsigned rate)
 static int pc_clk_set_min_rate(struct clk *clk, unsigned rate)
 {
 	int rc;
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	bool ignore_error = (cpu_is_msm7x27() && id == P_EBI1_CLK &&
 				rate >= INT_MAX);
 
@@ -106,7 +106,7 @@ static int pc_clk_set_min_rate(struct clk *clk, unsigned rate)
 
 static int pc_clk_set_max_rate(struct clk *clk, unsigned rate)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	int rc = msm_proc_comm(PCOM_CLKCTL_RPC_MAX_RATE, &id, &rate);
 	if (rc < 0)
 		return rc;
@@ -116,7 +116,7 @@ static int pc_clk_set_max_rate(struct clk *clk, unsigned rate)
 
 static int pc_clk_set_flags(struct clk *clk, unsigned flags)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	int rc = msm_proc_comm(PCOM_CLKCTL_RPC_SET_FLAGS, &id, &flags);
 	if (rc < 0)
 		return rc;
@@ -126,7 +126,7 @@ static int pc_clk_set_flags(struct clk *clk, unsigned flags)
 
 static int pc_clk_set_ext_config(struct clk *clk, unsigned config)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	int rc = msm_proc_comm(PCOM_CLKCTL_RPC_SET_EXT_CONFIG, &id, &config);
 	if (rc < 0)
 		return rc;
@@ -136,7 +136,7 @@ static int pc_clk_set_ext_config(struct clk *clk, unsigned config)
 
 static unsigned pc_clk_get_rate(struct clk *clk)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	if (msm_proc_comm(PCOM_CLKCTL_RPC_RATE, &id, NULL))
 		return 0;
 	else
@@ -145,7 +145,7 @@ static unsigned pc_clk_get_rate(struct clk *clk)
 
 static int pc_clk_is_enabled(struct clk *clk)
 {
-	int id = to_pcom_clk(clk)->id;
+	unsigned int id = to_pcom_clk(clk)->id;
 	if (msm_proc_comm(PCOM_CLKCTL_RPC_ENABLED, &id, NULL))
 		return 0;
 	else

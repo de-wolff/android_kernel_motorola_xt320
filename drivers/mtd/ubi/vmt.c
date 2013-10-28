@@ -304,7 +304,7 @@ int ubi_create_volume(struct ubi_device *ubi, struct ubi_mkvol_req *req)
 	} else {
 		vol->used_ebs = div_u64_rem(vol->used_bytes,
 					    vol->usable_leb_size,
-					    &vol->last_eb_bytes);
+					    (u32 *)&vol->last_eb_bytes);
 		if (vol->last_eb_bytes != 0)
 			vol->used_ebs += 1;
 		else

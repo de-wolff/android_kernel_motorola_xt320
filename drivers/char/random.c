@@ -815,7 +815,7 @@ static void extract_buf(struct entropy_store *r, __u8 *out)
 	/* Generate a hash across the pool, 16 words (512 bits) at a time */
 	sha_init(hash);
 	for (i = 0; i < r->poolinfo->poolwords; i += 16)
-		sha_transform(hash, (__u8 *)(r->pool + i), workspace);
+		sha_transform(hash, (char *)(r->pool + i), workspace);
 
 	/*
 	 * We mix the hash back into the pool to prevent backtracking
@@ -832,7 +832,7 @@ static void extract_buf(struct entropy_store *r, __u8 *out)
 	 * To avoid duplicates, we atomically extract a portion of the
 	 * pool while mixing, and hash one final time.
 	 */
-	sha_transform(hash, extract, workspace);
+	sha_transform(hash, (char *)extract, workspace);
 	memset(extract, 0, sizeof(extract));
 	memset(workspace, 0, sizeof(workspace));
 
@@ -1234,7 +1234,7 @@ static int proc_do_uuid(ctl_table *table, int write,
 	if (uuid[8] == 0)
 		generate_random_uuid(uuid);
 
-	sprintf(buf, "%pU", uuid);
+	sprintf((char *)buf, "%pU", uuid);
 
 	fake_table.data = buf;
 	fake_table.maxlen = sizeof(buf);

@@ -727,7 +727,7 @@ done:
 		retv = -EPERM;
 		if (!capable(CAP_NET_ADMIN))
 			break;
-		retv = xfrm_user_policy(sk, optname, optval, optlen);
+		retv = xfrm_user_policy(sk, optname, (unsigned char *)optval, optlen);
 		break;
 
 	case IPV6_ADDR_PREFERENCES:

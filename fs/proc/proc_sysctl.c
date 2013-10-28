@@ -189,7 +189,7 @@ static int proc_sys_fill_cache(struct file *filp, void *dirent,
 	ino_t ino = 0;
 	unsigned type = DT_UNKNOWN;
 
-	qname.name = table->procname;
+	qname.name = (unsigned char *)table->procname;
 	qname.len  = strlen(table->procname);
 	qname.hash = full_name_hash(qname.name, qname.len);
 
@@ -213,7 +213,7 @@ static int proc_sys_fill_cache(struct file *filp, void *dirent,
 	ino  = inode->i_ino;
 	type = inode->i_mode >> 12;
 	dput(child);
-	return !!filldir(dirent, qname.name, qname.len, filp->f_pos, ino, type);
+	return !!filldir(dirent, (char *)qname.name, qname.len, filp->f_pos, ino, type);
 }
 
 static int scan(struct ctl_table_header *head, ctl_table *table,

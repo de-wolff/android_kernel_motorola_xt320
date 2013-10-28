@@ -235,8 +235,8 @@ struct snd_kcontrol *snd_ctl_new1(const struct snd_kcontrol_new *ncontrol,
 	kctl.id.device = ncontrol->device;
 	kctl.id.subdevice = ncontrol->subdevice;
 	if (ncontrol->name) {
-		strlcpy(kctl.id.name, ncontrol->name, sizeof(kctl.id.name));
-		if (strcmp(ncontrol->name, kctl.id.name) != 0)
+		strlcpy((char *)kctl.id.name, (const char *)ncontrol->name, sizeof(kctl.id.name));
+		if (strcmp((const char *)ncontrol->name, (const char *)kctl.id.name) != 0)
 			snd_printk(KERN_WARNING
 				   "Control name '%s' truncated to '%s'\n",
 				   ncontrol->name, kctl.id.name);
@@ -551,7 +551,7 @@ struct snd_kcontrol *snd_ctl_find_id(struct snd_card *card,
 			continue;
 		if (kctl->id.subdevice != id->subdevice)
 			continue;
-		if (strncmp(kctl->id.name, id->name, sizeof(kctl->id.name)))
+		if (strncmp((const char *)kctl->id.name, (const char *)id->name, sizeof(kctl->id.name)))
 			continue;
 		if (kctl->id.index > id->index)
 			continue;
@@ -574,12 +574,12 @@ static int snd_ctl_card_info(struct snd_card *card, struct snd_ctl_file * ctl,
 		return -ENOMEM;
 	down_read(&snd_ioctl_rwsem);
 	info->card = card->number;
-	strlcpy(info->id, card->id, sizeof(info->id));
-	strlcpy(info->driver, card->driver, sizeof(info->driver));
-	strlcpy(info->name, card->shortname, sizeof(info->name));
-	strlcpy(info->longname, card->longname, sizeof(info->longname));
-	strlcpy(info->mixername, card->mixername, sizeof(info->mixername));
-	strlcpy(info->components, card->components, sizeof(info->components));
+	strlcpy((char *)info->id, (const char *)card->id, sizeof(info->id));
+	strlcpy((char *)info->driver, (const char *)card->driver, sizeof(info->driver));
+	strlcpy((char *)info->name, (const char *)card->shortname, sizeof(info->name));
+	strlcpy((char *)info->longname, (const char *)card->longname, sizeof(info->longname));
+	strlcpy((char *)info->mixername, (const char *)card->mixername, sizeof(info->mixername));
+	strlcpy((char *)info->components, (const char *)card->components, sizeof(info->components));
 	up_read(&snd_ioctl_rwsem);
 	if (copy_to_user(arg, info, sizeof(struct snd_ctl_card_info))) {
 		kfree(info);
@@ -1533,7 +1533,7 @@ int snd_ctl_enum_info(struct snd_ctl_elem_info *info, unsigned int channels,
 	info->value.enumerated.items = items;
 	if (info->value.enumerated.item >= items)
 		info->value.enumerated.item = items - 1;
-	strlcpy(info->value.enumerated.name,
+	strlcpy((char *)info->value.enumerated.name,
 		names[info->value.enumerated.item],
 		sizeof(info->value.enumerated.name));
 	return 0;

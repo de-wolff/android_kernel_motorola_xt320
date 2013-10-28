@@ -955,7 +955,7 @@ static ssize_t tty_read(struct file *file, char __user *buf, size_t count,
 	   situation */
 	ld = tty_ldisc_ref_wait(tty);
 	if (ld->ops->read)
-		i = (ld->ops->read)(tty, file, buf, count);
+		i = (ld->ops->read)(tty, file, (unsigned char *)buf, count);
 	else
 		i = -EIO;
 	tty_ldisc_deref(ld);
@@ -1088,7 +1088,7 @@ void tty_write_message(struct tty_struct *tty, char *msg)
 		tty_lock();
 		if (tty->ops->write && !test_bit(TTY_CLOSING, &tty->flags)) {
 			tty_unlock();
-			tty->ops->write(tty, msg, strlen(msg));
+			tty->ops->write(tty, (unsigned char *)msg, strlen(msg));
 		} else
 			tty_unlock();
 		tty_write_unlock(tty);
@@ -2063,7 +2063,7 @@ static int tiocsti(struct tty_struct *tty, char __user *p)
 		return -EFAULT;
 	tty_audit_tiocsti(tty, ch);
 	ld = tty_ldisc_ref_wait(tty);
-	ld->ops->receive_buf(tty, &ch, &mbz, 1);
+	ld->ops->receive_buf(tty, (unsigned char *)&ch, &mbz, 1);
 	tty_ldisc_deref(ld);
 	return 0;
 }

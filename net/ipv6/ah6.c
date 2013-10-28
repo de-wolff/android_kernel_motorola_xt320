@@ -648,7 +648,7 @@ static int ah6_init_state(struct xfrm_state *x)
 		goto error;
 
 	ahp->ahash = ahash;
-	if (crypto_ahash_setkey(ahash, x->aalg->alg_key,
+	if (crypto_ahash_setkey(ahash, (unsigned char *)x->aalg->alg_key,
 			       (x->aalg->alg_key_len + 7) / 8))
 		goto error;
 

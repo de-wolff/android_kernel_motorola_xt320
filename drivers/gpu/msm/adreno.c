@@ -821,7 +821,7 @@ adreno_recover_hang(struct kgsl_device *device)
 	}
 	/* Extract valid contents from rb which can stil be executed after
 	 * hang */
-	ret = adreno_ringbuffer_extract(rb, rb_buffer, &num_rb_contents);
+	ret = adreno_ringbuffer_extract(rb, rb_buffer, (int *)&num_rb_contents);
 	if (ret)
 		goto done;
 	kgsl_sharedmem_readl(&device->memstore, &context_id,

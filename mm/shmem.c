@@ -2735,7 +2735,7 @@ struct file *shmem_file_setup(const char *name, loff_t size, unsigned long flags
 		return ERR_PTR(-ENOMEM);
 
 	error = -ENOMEM;
-	this.name = name;
+	this.name = (const unsigned char *)name;
 	this.len = strlen(name);
 	this.hash = 0; /* will go */
 	root = shm_mnt->mnt_root;

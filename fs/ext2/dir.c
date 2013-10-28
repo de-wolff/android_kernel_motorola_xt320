@@ -369,7 +369,7 @@ ext2_readdir (struct file * filp, void * dirent, filldir_t filldir)
 struct ext2_dir_entry_2 *ext2_find_entry (struct inode * dir,
 			struct qstr *child, struct page ** res_page)
 {
-	const char *name = child->name;
+	const char *name = (const char *) child->name;
 	int namelen = child->len;
 	unsigned reclen = EXT2_DIR_REC_LEN(namelen);
 	unsigned long start, n;
@@ -490,7 +490,7 @@ void ext2_set_link(struct inode *dir, struct ext2_dir_entry_2 *de,
 int ext2_add_link (struct dentry *dentry, struct inode *inode)
 {
 	struct inode *dir = dentry->d_parent->d_inode;
-	const char *name = dentry->d_name.name;
+	const char *name = (const char *)dentry->d_name.name;
 	int namelen = dentry->d_name.len;
 	unsigned chunk_size = ext2_chunk_size(dir);
 	unsigned reclen = EXT2_DIR_REC_LEN(namelen);

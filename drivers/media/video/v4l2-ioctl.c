@@ -134,7 +134,7 @@ int v4l2_video_std_construct(struct v4l2_standard *vs,
 	vs->id = id;
 	v4l2_video_std_frame_period(id, &vs->frameperiod);
 	vs->framelines = (id & V4L2_STD_525_60) ? 525 : 625;
-	strlcpy(vs->name, name, sizeof(vs->name));
+	strlcpy((char *)vs->name, name, sizeof(vs->name));
 	return 0;
 }
 EXPORT_SYMBOL(v4l2_video_std_construct);

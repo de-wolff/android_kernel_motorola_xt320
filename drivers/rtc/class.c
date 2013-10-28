@@ -57,7 +57,7 @@ static int rtc_suspend(struct device *dev, pm_message_t mesg)
 
 	getnstimeofday(&ts);
 	rtc_read_time(rtc, &tm);
-	rtc_tm_to_time(&tm, &oldtime);
+	rtc_tm_to_time(&tm, (unsigned long *)&oldtime);
 
 	/* RTC precision is 1 second; adjust delta for avg 1/2 sec err */
 	set_normalized_timespec(&new_delta,
@@ -86,7 +86,7 @@ static int rtc_resume(struct device *dev)
 		pr_debug("%s:  bogus resume time\n", dev_name(&rtc->dev));
 		return 0;
 	}
-	rtc_tm_to_time(&tm, &newtime);
+	rtc_tm_to_time(&tm, (unsigned long *)&newtime);
 	if (delta_delta.tv_sec < -1)
 		newtime++;
 	if (newtime <= oldtime) {

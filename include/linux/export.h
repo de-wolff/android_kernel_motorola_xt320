@@ -48,6 +48,7 @@ extern struct module __this_module;
 #endif
 
 /* For every exported symbol, place a struct in the __ksymtab section */
+#ifndef __EXPORT_SYMBOL
 #define __EXPORT_SYMBOL(sym, sec)				\
 	extern typeof(sym) sym;					\
 	__CRC_SYMBOL(sym, sec)					\
@@ -58,6 +59,7 @@ extern struct module __this_module;
 	__used							\
 	__attribute__((section("___ksymtab" sec "+" #sym), unused))	\
 	= { (unsigned long)&sym, __kstrtab_##sym }
+#endif
 
 #define EXPORT_SYMBOL(sym)					\
 	__EXPORT_SYMBOL(sym, "")

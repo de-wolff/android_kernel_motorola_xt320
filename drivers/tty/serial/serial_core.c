@@ -169,7 +169,7 @@ static int uart_startup(struct tty_struct *tty, struct uart_state *state, int in
 		if (!page)
 			return -ENOMEM;
 
-		state->xmit.buf = (unsigned char *) page;
+		state->xmit.buf = (char *) page;
 		uart_circ_clear(&state->xmit);
 	}
 

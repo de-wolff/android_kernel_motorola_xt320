@@ -594,7 +594,7 @@ static int rh_call_control (struct usb_hcd *hcd, struct urb *urb)
 		}
 		status = hcd->driver->hub_control (hcd,
 			typeReq, wValue, wIndex,
-			tbuf, wLength);
+			(char *)tbuf, wLength);
 		break;
 error:
 		/* "protocol stall" on error */

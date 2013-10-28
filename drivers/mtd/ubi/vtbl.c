@@ -191,7 +191,7 @@ static int vtbl_check(const struct ubi_device *ubi,
 		upd_marker = vtbl[i].upd_marker;
 		vol_type = vtbl[i].vol_type;
 		name_len = be16_to_cpu(vtbl[i].name_len);
-		name = &vtbl[i].name[0];
+		name = (const char *)&vtbl[i].name[0];
 
 		crc = crc32(UBI_CRC32_INIT, &vtbl[i], UBI_VTBL_RECORD_SIZE_CRC);
 		if (be32_to_cpu(vtbl[i].crc) != crc) {
@@ -274,7 +274,7 @@ static int vtbl_check(const struct ubi_device *ubi,
 			int len2 = be16_to_cpu(vtbl[n].name_len);
 
 			if (len1 > 0 && len1 == len2 &&
-			    !strncmp(vtbl[i].name, vtbl[n].name, len1)) {
+			    !strncmp((const char *)vtbl[i].name, (const char *)vtbl[n].name, len1)) {
 				ubi_err("volumes %d and %d have the same name"
 					" \"%s\"", i, n, vtbl[i].name);
 				ubi_dbg_dump_vtbl_record(&vtbl[i], i);

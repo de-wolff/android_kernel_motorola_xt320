@@ -1654,14 +1654,14 @@ SYSCALL_DEFINE5(prctl, int, option, unsigned long, arg2, unsigned long, arg3,
 
 		case PR_SET_NAME:
 			comm[sizeof(me->comm)-1] = 0;
-			if (strncpy_from_user(comm, (char __user *)arg2,
+			if (strncpy_from_user((char __user *)comm, (char __user *)arg2,
 					      sizeof(me->comm) - 1) < 0)
 				return -EFAULT;
-			set_task_comm(me, comm);
+			set_task_comm(me, (char __user *)comm);
 			return 0;
 		case PR_GET_NAME:
-			get_task_comm(comm, me);
-			if (copy_to_user((char __user *)arg2, comm,
+			get_task_comm((char __user *)comm, me);
+			if (copy_to_user((char __user *)arg2, (char __user *)comm,
 					 sizeof(comm)))
 				return -EFAULT;
 			return 0;

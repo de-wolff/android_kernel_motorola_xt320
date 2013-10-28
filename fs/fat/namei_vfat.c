@@ -100,7 +100,7 @@ static unsigned int __vfat_striptail_len(unsigned int len, const char *name)
 
 static unsigned int vfat_striptail_len(const struct qstr *qstr)
 {
-	return __vfat_striptail_len(qstr->len, qstr->name);
+	return __vfat_striptail_len(qstr->len, (const char *)qstr->name);
 }
 
 /*
@@ -155,7 +155,7 @@ static int vfat_cmpi(const struct dentry *parent, const struct inode *pinode,
 	alen = vfat_striptail_len(name);
 	blen = __vfat_striptail_len(len, str);
 	if (alen == blen) {
-		if (nls_strnicmp(t, name->name, str, alen) == 0)
+		if (nls_strnicmp(t, name->name, (const unsigned char *)str, alen) == 0)
 			return 0;
 	}
 	return 1;
@@ -174,7 +174,7 @@ static int vfat_cmp(const struct dentry *parent, const struct inode *pinode,
 	alen = vfat_striptail_len(name);
 	blen = __vfat_striptail_len(len, str);
 	if (alen == blen) {
-		if (strncmp(name->name, str, alen) == 0)
+		if (strncmp((const char *)name->name, str, alen) == 0)
 			return 0;
 	}
 	return 1;
@@ -491,7 +491,7 @@ static int vfat_create_shortname(struct inode *dir, struct nls_table *nls,
 	name_res[baselen + 4] = '~';
 	name_res[baselen + 5] = '1' + sz;
 	while (1) {
-		snprintf(buf, sizeof(buf), "%04X", i & 0xffff);
+		snprintf((char *)buf, sizeof(buf), "%04X", i & 0xffff);
 		memcpy(&name_res[baselen], buf, 4);
 		if (vfat_find_form(dir, name_res) < 0)
 			break;
@@ -656,7 +656,7 @@ static int vfat_build_slots(struct inode *dir, const unsigned char *name,
 shortname:
 	/* build the entry of 8.3 alias name */
 	(*nr_slots)++;
-	memcpy(de->name, msdos_name, MSDOS_NAME);
+	memcpy((char *)de->name, msdos_name, MSDOS_NAME);
 	de->attr = is_dir ? ATTR_DIR : ATTR_ARCH;
 	de->lcase = lcase;
 	fat_time_unix2fat(sbi, ts, &time, &date, &time_cs);

@@ -1367,7 +1367,7 @@ exec_again:
  		if (err)
 			break;
 
-		this.name = name;
+		this.name = (const unsigned char *)name;
 		c = *(const unsigned char *)name;
 
 		hash = init_name_hash();
@@ -1854,7 +1854,7 @@ static int __lookup_one_len(const char *name, struct qstr *this,
 	unsigned long hash;
 	unsigned int c;
 
-	this->name = name;
+	this->name = (const unsigned char *)name;
 	this->len = len;
 	if (!len)
 		return -EACCES;

@@ -531,7 +531,7 @@ static int32_t ov7692_set_sensor_mode(int mode,
 
 static int ov7692_set_sensor_contrast(int index)
 {
-	int8_t temp;
+	uint8_t temp;
 
 	printk("%s(), index = %d\n", __func__, index);
 	switch (index) {

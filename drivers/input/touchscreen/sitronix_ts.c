@@ -1531,13 +1531,13 @@ static int st1232_isp_erase(struct i2c_client *client, u8 page_num)
 	data[1] = 0x0;
 	data[2] = page_num;
 
-	if (i2c_master_send(client, data, sizeof(data)) != sizeof(data)) {
+	if (i2c_master_send(client, (char *)data, sizeof(data)) != sizeof(data)) {
 		dev_err(&client->dev, "%s(%u): ISP erase page(%u) failed!\n",
 						__FUNCTION__, __LINE__, (unsigned int)page_num);
 		return -EIO;
 	}
 
-	if (i2c_master_recv(client, data, sizeof(data)) != sizeof(data) || data[0] != STX_ISP_READY) {
+	if (i2c_master_recv(client, (char *)data, sizeof(data)) != sizeof(data) || data[0] != STX_ISP_READY) {
 		dev_err(&client->dev, "%s(%u): ISP read READY failed!\n", __FUNCTION__, __LINE__);
 		return -EIO;
 	}
@@ -1551,7 +1551,7 @@ static int st1232_isp_reset(struct i2c_client *client)
 
 	data[0] = STX_ISP_RESET;
 
-	if (i2c_master_send(client, data, sizeof(data)) != sizeof(data)) {
+	if (i2c_master_send(client, (char *)data, sizeof(data)) != sizeof(data)) {
 		dev_err(&client->dev, "%s(%u): ISP reset chip failed!\n", __FUNCTION__, __LINE__);
 		return -EIO;
 	}
@@ -1567,10 +1567,10 @@ static int st1232_jump_to_isp(struct i2c_client *client)
 	u8 signature[] = "STX_FWUP";
 	u8 buf[2];
 
-	for (i = 0; i < strlen(signature); i++) {
+	for (i = 0; i < strlen((const char *)signature); i++) {
 		buf[0] = 0x0;
 		buf[1] = signature[i];
-		if (i2c_master_send(client, buf, 2) != 2) {
+		if (i2c_master_send(client, (char *)buf, 2) != 2) {
 			dev_err(&client->dev, "%s(%u): Unable to write ISP STX_FWUP!\n", __FUNCTION__, __LINE__);
 			return -EIO;
 		}
@@ -1591,7 +1591,7 @@ static int st1232_isp_read_page(struct i2c_client *client, char *page_buf, u8 pa
 	memset(page_buf, 0, ST1232_ISP_PAGE_SIZE);
 	data[0] = STX_ISP_READ_FLASH;
 	data[2] = page_num;
-	if (i2c_master_send(client, data, sizeof(data)) != sizeof(data)) {
+	if (i2c_master_send(client, (char *)data, sizeof(data)) != sizeof(data)) {
 		dev_err(&client->dev, "%s(%u): ISP read flash failed!\n", __FUNCTION__, __LINE__);
 		return -EIO;
 	}
@@ -1636,7 +1636,7 @@ static int st1232_isp_write_page(struct i2c_client *client, char *page_buf, u8 p
 	data[4] = (cksum & 0xFF);
 	data[5] = ((cksum & 0xFF) >> 8);
 
-	if (i2c_master_send(client, data, sizeof(data)) != sizeof(data)) {
+	if (i2c_master_send(client, (char *)data, sizeof(data)) != sizeof(data)) {
 		dev_err(&client->dev, "%s(%u): ISP write page failed!\n", __FUNCTION__, __LINE__);
 		return -EIO;
 	}
@@ -1648,7 +1648,7 @@ static int st1232_isp_write_page(struct i2c_client *client, char *page_buf, u8 p
 		len = (wlen < 7) ? wlen : 7;
 		memcpy(&data[1], page_buf, len);
 
-		if (i2c_master_send(client, data, sizeof(data)) != sizeof(data)) {
+		if (i2c_master_send(client, (char *)data, sizeof(data)) != sizeof(data)) {
 			dev_err(&client->dev, "%s(%u): ISP send data failed!\n", __FUNCTION__, __LINE__);
 			return -EIO;
 		}
@@ -1657,7 +1657,7 @@ static int st1232_isp_write_page(struct i2c_client *client, char *page_buf, u8 p
 		page_buf += 7;
 	}
 
-	if (i2c_master_recv(client, data, sizeof(data)) != sizeof(data) || data[0] != STX_ISP_READY) {
+	if (i2c_master_recv(client, (char *)data, sizeof(data)) != sizeof(data) || data[0] != STX_ISP_READY) {
 		dev_err(&client->dev, "%s(%u): ISP read READY failed!\n", __FUNCTION__, __LINE__);
 		return -EIO;
 	}
@@ -1675,7 +1675,7 @@ static int st1232_isp_read_flash(struct i2c_client *client, char *buf, loff_t of
 
 	if (page_off) {
 
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return len;
 
 		len -= page_off;
@@ -1690,7 +1690,7 @@ static int st1232_isp_read_flash(struct i2c_client *client, char *buf, loff_t of
 	}
 
 	while (count) {
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return len;
 
 		len = (count > len ? len : count);
@@ -1741,7 +1741,7 @@ static int st1232_isp_write_flash(struct i2c_client *client, char *buf, loff_t o
 
 		// Start RMW.
 		// Read page.
-		if ((rc = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((rc = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return rc;
 
 		len = ST1232_ISP_PAGE_SIZE - page_off;
@@ -1749,7 +1749,7 @@ static int st1232_isp_write_flash(struct i2c_client *client, char *buf, loff_t o
 		memcpy((isp_page_buf+page_off), buf, len);
 
 		// Write back page.
-		st1232_isp_write_page(client, isp_page_buf, page_num);
+		st1232_isp_write_page(client, (char *)isp_page_buf, page_num);
 
 		buf += len;
 		count -= len;
@@ -1761,7 +1761,7 @@ static int st1232_isp_write_flash(struct i2c_client *client, char *buf, loff_t o
 			len = ST1232_ISP_PAGE_SIZE;
 			memcpy(isp_page_buf, buf, len);
 
-			if ((rc = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+			if ((rc = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return rc;
 
 			buf += len;
@@ -1770,7 +1770,7 @@ static int st1232_isp_write_flash(struct i2c_client *client, char *buf, loff_t o
 		} else {
 			// Start RMW.
 			// Read page.
-			if ((rc = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+			if ((rc = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return rc;
 
 			len = count;
@@ -1778,7 +1778,7 @@ static int st1232_isp_write_flash(struct i2c_client *client, char *buf, loff_t o
 			memcpy(isp_page_buf, buf, len);
 
 			// Write back page.
-			if ((rc = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+			if ((rc = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return rc;
 
 			buf += len;
@@ -1848,7 +1848,7 @@ static ssize_t st1232_panel_config_write(struct file *filp, struct kobject *kobj
 	}
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)buf, page_num)) < 0)
 				return -EIO;
 	return count;
 }
@@ -1925,7 +1925,7 @@ static ssize_t sitronix_ts_struct_version_show(struct device *dev, struct device
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	//ISP Reset.
@@ -1961,7 +1961,7 @@ static ssize_t sitronix_ts_data_threshold_show(struct device *dev, struct device
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2009,7 +2009,7 @@ static ssize_t sitronix_ts_data_threshold_store(struct device *dev, struct devic
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2030,7 +2030,7 @@ static ssize_t sitronix_ts_data_threshold_store(struct device *dev, struct devic
 		pROM_v1->data_threshold_offset_k = k_offset&0xFF;
 	}
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2064,7 +2064,7 @@ static ssize_t sitronix_ts_point_threshold_show(struct device *dev, struct devic
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2103,14 +2103,14 @@ static ssize_t sitronix_ts_point_threshold_store(struct device *dev, struct devi
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 	pROM = (struct config_param_v0 *)(&isp_page_buf);
 	pROM->pt_threshold_shift = shift&0xFF;
 	pROM->pt_threshold_offset = offset&0xFF;
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2144,7 +2144,7 @@ static ssize_t sitronix_ts_peak_threshold_show(struct device *dev, struct device
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00)
@@ -2190,7 +2190,7 @@ static ssize_t sitronix_ts_peak_threshold_store(struct device *dev, struct devic
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2208,7 +2208,7 @@ static ssize_t sitronix_ts_peak_threshold_store(struct device *dev, struct devic
 	}
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2241,7 +2241,7 @@ static ssize_t sitronix_ts_mutual_threshold_show(struct device *dev, struct devi
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00)
@@ -2282,7 +2282,7 @@ static ssize_t sitronix_ts_mutual_threshold_store(struct device *dev, struct dev
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2296,7 +2296,7 @@ static ssize_t sitronix_ts_mutual_threshold_store(struct device *dev, struct dev
 	}
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2330,7 +2330,7 @@ static ssize_t sitronix_ts_range_filter_show(struct device *dev, struct device_a
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2372,7 +2372,7 @@ static ssize_t sitronix_ts_range_filter_store(struct device *dev, struct device_
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2388,7 +2388,7 @@ static ssize_t sitronix_ts_range_filter_store(struct device *dev, struct device_
 	}
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2420,7 +2420,7 @@ static ssize_t sitronix_ts_barX_filter_show(struct device *dev, struct device_at
 		}
 	
 		//Read data from ROM
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 		pROM_v1 = (struct config_param_v1 *)(&isp_page_buf);
@@ -2458,7 +2458,7 @@ static ssize_t sitronix_ts_barX_filter_store(struct device *dev, struct device_a
 		}
 	
 		//Read data from ROM
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 		pROM_v1 = (struct config_param_v1 *)(&isp_page_buf);
@@ -2468,7 +2468,7 @@ static ssize_t sitronix_ts_barX_filter_store(struct device *dev, struct device_a
 	
 	
 		//Write back
-		if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 		//ISP Reset.
@@ -2504,7 +2504,7 @@ static ssize_t sitronix_ts_barY_filter_show(struct device *dev, struct device_at
 		}
 	
 		//Read data from ROM
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 
 		pROM_v1 = (struct config_param_v1 *)(&isp_page_buf);
@@ -2542,7 +2542,7 @@ static ssize_t sitronix_ts_barY_filter_store(struct device *dev, struct device_a
 		}
 	
 		//Read data from ROM
-		if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 
 		pROM_v1 = (struct config_param_v1 *)(&isp_page_buf);
@@ -2552,7 +2552,7 @@ static ssize_t sitronix_ts_barY_filter_store(struct device *dev, struct device_a
 	
 	
 		//Write back
-		if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+		if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 					return -EIO;
 	
 		//ISP Reset.
@@ -2585,7 +2585,7 @@ static ssize_t sitronix_ts_resolution_show(struct device *dev, struct device_att
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2624,7 +2624,7 @@ static ssize_t sitronix_ts_resolution_store(struct device *dev, struct device_at
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	if(priv->struct_version == 0x00) {
@@ -2638,7 +2638,7 @@ static ssize_t sitronix_ts_resolution_store(struct device *dev, struct device_at
 	}
 	
 	//Write back
-	if ((len = st1232_isp_write_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_write_page(client, (char *)isp_page_buf, page_num)) < 0)
 				return -EIO;
 	
 	//ISP Reset.
@@ -2701,7 +2701,7 @@ static ssize_t sitronix_ts_para_show(struct device *dev, struct device_attribute
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 	
 	for(i = 0 ; i < 32 ; i++) {
@@ -2736,7 +2736,7 @@ static int sitronix_ts_autotune_result_check(struct device *dev, int count_low, 
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 	if(priv->struct_version == 0x00) {
 		pROM_v0 = (struct config_param_v0 *)(&isp_page_buf);
@@ -3025,7 +3025,7 @@ static int sitronix_ts_get_struct_version(struct i2c_client *client, u8 *rev)
 	}
 	
 	//Read data from ROM
-	if ((len = st1232_isp_read_page(client, isp_page_buf, page_num)) < 0)
+	if ((len = st1232_isp_read_page(client, (char *)isp_page_buf, page_num)) < 0)
 			return -EIO;
 
 	*rev = (u8)isp_page_buf[1];

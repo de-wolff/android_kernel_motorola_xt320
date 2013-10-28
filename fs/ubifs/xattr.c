@@ -257,17 +257,17 @@ static int check_namespace(const struct qstr *nm)
 	if (nm->len > UBIFS_MAX_NLEN)
 		return -ENAMETOOLONG;
 
-	if (!strncmp(nm->name, XATTR_TRUSTED_PREFIX,
+	if (!strncmp((const char *)nm->name, XATTR_TRUSTED_PREFIX,
 		     XATTR_TRUSTED_PREFIX_LEN)) {
 		if (nm->name[sizeof(XATTR_TRUSTED_PREFIX) - 1] == '\0')
 			return -EINVAL;
 		type = TRUSTED_XATTR;
-	} else if (!strncmp(nm->name, XATTR_USER_PREFIX,
+	} else if (!strncmp((const char *)nm->name, XATTR_USER_PREFIX,
 				      XATTR_USER_PREFIX_LEN)) {
 		if (nm->name[XATTR_USER_PREFIX_LEN] == '\0')
 			return -EINVAL;
 		type = USER_XATTR;
-	} else if (!strncmp(nm->name, XATTR_SECURITY_PREFIX,
+	} else if (!strncmp((const char *)nm->name, XATTR_SECURITY_PREFIX,
 				     XATTR_SECURITY_PREFIX_LEN)) {
 		if (nm->name[sizeof(XATTR_SECURITY_PREFIX) - 1] == '\0')
 			return -EINVAL;
@@ -300,7 +300,7 @@ int ubifs_setxattr(struct dentry *dentry, const char *name,
 {
 	struct inode *inode, *host = dentry->d_inode;
 	struct ubifs_info *c = host->i_sb->s_fs_info;
-	struct qstr nm = { .name = name, .len = strlen(name) };
+	struct qstr nm = { .name = (const unsigned char *)name, .len = strlen(name) };
 	struct ubifs_dent_node *xent;
 	union ubifs_key key;
 	int err, type;
@@ -363,7 +363,7 @@ ssize_t ubifs_getxattr(struct dentry *dentry, const char *name, void *buf,
 {
 	struct inode *inode, *host = dentry->d_inode;
 	struct ubifs_info *c = host->i_sb->s_fs_info;
-	struct qstr nm = { .name = name, .len = strlen(name) };
+	struct qstr nm = { .name = (const unsigned char *)name, .len = strlen(name) };
 	struct ubifs_inode *ui;
 	struct ubifs_dent_node *xent;
 	union ubifs_key key;
@@ -526,7 +526,7 @@ int ubifs_removexattr(struct dentry *dentry, const char *name)
 {
 	struct inode *inode, *host = dentry->d_inode;
 	struct ubifs_info *c = host->i_sb->s_fs_info;
-	struct qstr nm = { .name = name, .len = strlen(name) };
+	struct qstr nm = { .name = (const unsigned char *)name, .len = strlen(name) };
 	struct ubifs_dent_node *xent;
 	union ubifs_key key;
 	int err;

@@ -115,7 +115,7 @@ static int nf_sockopt(struct sock *sk, u_int8_t pf, int val,
 int nf_setsockopt(struct sock *sk, u_int8_t pf, int val, char __user *opt,
 		  unsigned int len)
 {
-	return nf_sockopt(sk, pf, val, opt, &len, 0);
+	return nf_sockopt(sk, pf, val, opt, (int *)&len, 0);
 }
 EXPORT_SYMBOL(nf_setsockopt);
 

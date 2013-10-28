@@ -1660,7 +1660,7 @@ static __net_init int l2tp_init_net(struct net *net)
 
 static struct pernet_operations l2tp_net_ops = {
 	.init = l2tp_init_net,
-	.id   = &l2tp_net_id,
+	.id   = (int *)&l2tp_net_id,
 	.size = sizeof(struct l2tp_net),
 };
 

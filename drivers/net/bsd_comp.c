@@ -804,7 +804,7 @@ nomatch:
 
 static void bsd_incomp (void *state, unsigned char *ibuf, int icnt)
   {
-    (void) bsd_compress (state, ibuf, (char *) 0, icnt, 0);
+    (void) bsd_compress (state, ibuf, (unsigned char *) 0, icnt, 0);
   }
 
 /*

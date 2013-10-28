@@ -283,9 +283,9 @@ static struct stats dx_show_leaf(struct dx_hash_info *hinfo, struct ext3_dir_ent
 			if (show_names)
 			{
 				int len = de->name_len;
-				char *name = de->name;
+				unsigned char *name = de->name;
 				while (len--) printk("%c", *name++);
-				ext3fs_dirhash(de->name, de->name_len, &h);
+				ext3fs_dirhash((const char *)de->name, de->name_len, &h);
 				printk(":%x.%u ", h.hash,
 				       ((char *) de - base));
 			}
@@ -368,7 +368,7 @@ dx_probe(struct qstr *entry, struct inode *dir,
 		hinfo->hash_version += EXT3_SB(dir->i_sb)->s_hash_unsigned;
 	hinfo->seed = EXT3_SB(dir->i_sb)->s_hash_seed;
 	if (entry)
-		ext3fs_dirhash(entry->name, entry->len, hinfo);
+		ext3fs_dirhash((const char *)entry->name, entry->len, hinfo);
 	hash = hinfo->hash;
 
 	if (root->info.unused_flags & 1) {
@@ -590,7 +590,7 @@ static int htree_dirblock_to_tree(struct file *dir_file,
 			brelse (bh);
 			return count;
 		}
-		ext3fs_dirhash(de->name, de->name_len, hinfo);
+		ext3fs_dirhash((const char *)de->name, de->name_len, hinfo);
 		if ((hinfo->hash < start_hash) ||
 		    ((hinfo->hash == start_hash) &&
 		     (hinfo->minor_hash < start_minor_hash)))
@@ -718,7 +718,7 @@ static int dx_make_map(struct ext3_dir_entry_2 *de, unsigned blocksize,
 	while ((char *) de < base + blocksize)
 	{
 		if (de->name_len && de->inode) {
-			ext3fs_dirhash(de->name, de->name_len, &h);
+			ext3fs_dirhash((const char *)de->name, de->name_len, &h);
 			map_tail--;
 			map_tail->hash = h.hash;
 			map_tail->offs = (u16) ((char *) de - base);
@@ -810,7 +810,7 @@ static inline int search_dirblock(struct buffer_head * bh,
 	struct ext3_dir_entry_2 * de;
 	char * dlimit;
 	int de_len;
-	const char *name = child->name;
+	const char *name = (const char *)child->name;
 	int namelen = child->len;
 
 	de = (struct ext3_dir_entry_2 *) bh->b_data;
@@ -1056,7 +1056,7 @@ static struct dentry *ext3_lookup(struct inode * dir, struct dentry *dentry, str
 struct dentry *ext3_get_parent(struct dentry *child)
 {
 	unsigned long ino;
-	struct qstr dotdot = {.name = "..", .len = 2};
+	struct qstr dotdot = {.name = (const unsigned char *)"..", .len = 2};
 	struct ext3_dir_entry_2 * de;
 	struct buffer_head *bh;
 
@@ -1255,7 +1255,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 			     struct buffer_head * bh)
 {
 	struct inode	*dir = dentry->d_parent->d_inode;
-	const char	*name = dentry->d_name.name;
+	const char	*name = (const char *)dentry->d_name.name;
 	int		namelen = dentry->d_name.len;
 	unsigned long	offset = 0;
 	unsigned short	reclen;
@@ -1342,7 +1342,7 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 			    struct inode *inode, struct buffer_head *bh)
 {
 	struct inode	*dir = dentry->d_parent->d_inode;
-	const char	*name = dentry->d_name.name;
+	const char	*name = (const char *) dentry->d_name.name;
 	int		namelen = dentry->d_name.len;
 	struct buffer_head *bh2;
 	struct dx_root	*root;
@@ -1805,14 +1805,14 @@ retry:
 	de->inode = cpu_to_le32(inode->i_ino);
 	de->name_len = 1;
 	de->rec_len = ext3_rec_len_to_disk(EXT3_DIR_REC_LEN(de->name_len));
-	strcpy (de->name, ".");
+	strcpy ((char *)de->name, ".");
 	ext3_set_de_type(dir->i_sb, de, S_IFDIR);
 	de = ext3_next_entry(de);
 	de->inode = cpu_to_le32(dir->i_ino);
 	de->rec_len = ext3_rec_len_to_disk(inode->i_sb->s_blocksize -
 					EXT3_DIR_REC_LEN(1));
 	de->name_len = 2;
-	strcpy (de->name, "..");
+	strcpy ((char *)de->name, "..");
 	ext3_set_de_type(dir->i_sb, de, S_IFDIR);
 	inode->i_nlink = 2;
 	BUFFER_TRACE(dir_block, "call ext3_journal_dirty_metadata");
@@ -1876,8 +1876,8 @@ static int empty_dir (struct inode * inode)
 	de1 = ext3_next_entry(de);
 	if (le32_to_cpu(de->inode) != inode->i_ino ||
 			!le32_to_cpu(de1->inode) ||
-			strcmp (".", de->name) ||
-			strcmp ("..", de1->name)) {
+			strcmp (".", (const char *)de->name) ||
+			strcmp ("..", (const char *)de1->name)) {
 		ext3_warning (inode->i_sb, "empty_dir",
 			      "bad directory (dir #%lu) - no `.' or `..'",
 			      inode->i_ino);
@@ -2394,7 +2394,7 @@ static int ext3_rename (struct inode * old_dir, struct dentry *old_dentry,
 	 */
 	if (le32_to_cpu(old_de->inode) != old_inode->i_ino ||
 	    old_de->name_len != old_dentry->d_name.len ||
-	    strncmp(old_de->name, old_dentry->d_name.name, old_de->name_len) ||
+	    strncmp((const char *)old_de->name, (const char *)old_dentry->d_name.name, old_de->name_len) ||
 	    (retval = ext3_delete_entry(handle, old_dir,
 					old_de, old_bh)) == -ENOENT) {
 		/* old_de could have moved from under us during htree split, so

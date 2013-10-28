@@ -394,7 +394,7 @@ static int ndisc_constructor(struct neighbour *neigh)
 	} else {
 		if (is_multicast) {
 			neigh->nud_state = NUD_NOARP;
-			ndisc_mc_map(addr, neigh->ha, dev, 1);
+			ndisc_mc_map(addr, (char *)neigh->ha, dev, 1);
 		} else if (dev->flags&(IFF_NOARP|IFF_LOOPBACK)) {
 			neigh->nud_state = NUD_NOARP;
 			memcpy(neigh->ha, dev->dev_addr, dev->addr_len);

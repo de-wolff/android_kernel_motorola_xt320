@@ -991,7 +991,7 @@ struct file *create_write_pipe(int flags)
 	struct inode *inode;
 	struct file *f;
 	struct path path;
-	struct qstr name = { .name = "" };
+	struct qstr name = { .name = (unsigned char *)"" };
 
 	err = -ENFILE;
 	inode = get_pipe_inode();

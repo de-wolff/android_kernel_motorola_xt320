@@ -226,7 +226,6 @@ extract_icmp6_fields(const struct sk_buff *skb,
 	struct icmp6hdr *icmph, _icmph;
 	__be16 *ports, _ports[2];
 	u8 inside_nexthdr;
-	__be16 inside_fragoff;
 	int inside_hdrlen;
 
 	icmph = skb_header_pointer(skb, outside_hdrlen,
@@ -277,7 +276,7 @@ xt_socket_get6_sk(const struct sk_buff *skb, struct xt_action_param *par)
 	__be16 dport, sport;
 	int thoff, tproto;
 
-	tproto = ipv6_find_hdr(skb, &thoff, -1, NULL);
+	tproto = ipv6_find_hdr(skb, (unsigned int *)&thoff, -1, NULL);
 	if (tproto < 0) {
 		pr_debug("unable to find transport header in IPv6 packet, dropping\n");
 		return NF_DROP;

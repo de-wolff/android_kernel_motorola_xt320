@@ -183,7 +183,7 @@ static ssize_t mdp_reg_read(
 	j = 0;
 	num = 0;
 	bp = debug_buf;
-	cp = MDP_BASE + mdp_offset;
+	cp = (char *)(MDP_BASE + mdp_offset);
 	dlen = sizeof(debug_buf);
 	mdp_pipe_ctrl(MDP_CMD_BLOCK, MDP_BLOCK_POWER_ON, FALSE);
 	while (j++ < 8) {

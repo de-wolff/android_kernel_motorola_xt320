@@ -209,17 +209,17 @@ static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t
 
 		switch (mfi->mode) {
 		case MTD_MODE_OTP_FACTORY:
-			ret = mtd->read_fact_prot_reg(mtd, *ppos, len, &retlen, kbuf);
+			ret = mtd->read_fact_prot_reg(mtd, *ppos, len, &retlen, (unsigned char *)kbuf);
 			break;
 		case MTD_MODE_OTP_USER:
-			ret = mtd->read_user_prot_reg(mtd, *ppos, len, &retlen, kbuf);
+			ret = mtd->read_user_prot_reg(mtd, *ppos, len, &retlen, (unsigned char *)kbuf);
 			break;
 		case MTD_MODE_RAW:
 		{
 			struct mtd_oob_ops ops;
 
 			ops.mode = MTD_OOB_RAW;
-			ops.datbuf = kbuf;
+			ops.datbuf = (unsigned char *)kbuf;
 			ops.oobbuf = NULL;
 			ops.len = len;
 
@@ -228,7 +228,7 @@ static ssize_t mtd_read(struct file *file, char __user *buf, size_t count,loff_t
 			break;
 		}
 		default:
-			ret = mtd->read(mtd, *ppos, len, &retlen, kbuf);
+			ret = mtd->read(mtd, *ppos, len, &retlen, (unsigned char *)kbuf);
 		}
 		/* Nand returns -EBADMSG on ecc errors, but it returns
 		 * the data. For our userspace tools it is important
@@ -314,7 +314,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 				ret = -EOPNOTSUPP;
 				break;
 			}
-			ret = mtd->write_user_prot_reg(mtd, *ppos, len, &retlen, kbuf);
+			ret = mtd->write_user_prot_reg(mtd, *ppos, len, &retlen, (unsigned char *)kbuf);
 			break;
 
 		case MTD_MODE_RAW:
@@ -322,7 +322,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 			struct mtd_oob_ops ops;
 
 			ops.mode = MTD_OOB_RAW;
-			ops.datbuf = kbuf;
+			ops.datbuf =  (unsigned char *)kbuf;
 			ops.oobbuf = NULL;
 			ops.len = len;
 
@@ -332,7 +332,7 @@ static ssize_t mtd_write(struct file *file, const char __user *buf, size_t count
 		}
 
 		default:
-			ret = (*(mtd->write))(mtd, *ppos, len, &retlen, kbuf);
+			ret = (*(mtd->write))(mtd, *ppos, len, &retlen, (unsigned char *)kbuf);
 		}
 		if (!ret) {
 			*ppos += retlen;

@@ -189,7 +189,7 @@ int v4l2_ctrl_query_fill(struct v4l2_queryctrl *qctrl, s32 min, s32 max, s32 ste
 	qctrl->step = step;
 	qctrl->default_value = def;
 	qctrl->reserved[0] = qctrl->reserved[1] = 0;
-	strlcpy(qctrl->name, name, sizeof(qctrl->name));
+	strlcpy((char *)qctrl->name, name, sizeof(qctrl->name));
 	return 0;
 }
 EXPORT_SYMBOL(v4l2_ctrl_query_fill);
@@ -212,7 +212,7 @@ int v4l2_ctrl_query_menu(struct v4l2_querymenu *qmenu, struct v4l2_queryctrl *qc
 	for (i = 0; i < qmenu->index && menu_items[i]; i++) ;
 	if (menu_items[i] == NULL || menu_items[i][0] == '\0')
 		return -EINVAL;
-	strlcpy(qmenu->name, menu_items[qmenu->index], sizeof(qmenu->name));
+	strlcpy((char *)qmenu->name, menu_items[qmenu->index], sizeof(qmenu->name));
 	return 0;
 }
 EXPORT_SYMBOL(v4l2_ctrl_query_menu);
@@ -229,7 +229,7 @@ int v4l2_ctrl_query_menu_valid_items(struct v4l2_querymenu *qmenu, const u32 *id
 		return -EINVAL;
 	while (*ids != V4L2_CTRL_MENU_IDS_END) {
 		if (*ids++ == qmenu->index) {
-			strlcpy(qmenu->name, menu_items[qmenu->index],
+			strlcpy((char *)qmenu->name, menu_items[qmenu->index],
 					sizeof(qmenu->name));
 			return 0;
 		}
@@ -312,7 +312,7 @@ int v4l2_chip_match_i2c_client(struct i2c_client *c, const struct v4l2_dbg_match
 	case V4L2_CHIP_MATCH_I2C_DRIVER:
 		if (c->driver == NULL || c->driver->driver.name == NULL)
 			return 0;
-		len = strlen(c->driver->driver.name);
+		len = strlen((const char *)c->driver->driver.name);
 		/* legacy drivers have a ' suffix, don't try to match that */
 		if (len && c->driver->driver.name[len - 1] == '\'')
 			len--;
@@ -425,7 +425,7 @@ struct v4l2_subdev *v4l2_i2c_new_subdev(struct v4l2_device *v4l2_dev,
 	/* Setup the i2c board info with the device type and
 	   the device address. */
 	memset(&info, 0, sizeof(info));
-	strlcpy(info.type, client_type, sizeof(info.type));
+	strlcpy((char *)info.type, client_type, sizeof(info.type));
 	info.addr = addr;
 
 	return v4l2_i2c_new_subdev_board(v4l2_dev, adapter, &info, probe_addrs);
@@ -493,7 +493,7 @@ void v4l2_spi_subdev_init(struct v4l2_subdev *sd, struct spi_device *spi,
 	v4l2_set_subdevdata(sd, spi);
 	spi_set_drvdata(spi, sd);
 	/* initialize name */
-	strlcpy(sd->name, spi->dev.driver->name, sizeof(sd->name));
+	strlcpy((char *)sd->name, spi->dev.driver->name, sizeof(sd->name));
 }
 EXPORT_SYMBOL_GPL(v4l2_spi_subdev_init);
 
@@ -654,7 +654,7 @@ int v4l_fill_dv_preset_info(u32 preset, struct v4l2_dv_enum_preset *info)
 	info->preset = preset;
 	info->width = dv_presets[preset].width;
 	info->height = dv_presets[preset].height;
-	strlcpy(info->name, dv_presets[preset].name, sizeof(info->name));
+	strlcpy((char *)info->name, dv_presets[preset].name, sizeof(info->name));
 	return 0;
 }
 EXPORT_SYMBOL_GPL(v4l_fill_dv_preset_info);

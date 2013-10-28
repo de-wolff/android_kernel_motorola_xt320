@@ -100,7 +100,7 @@ static dev_t devt_from_partuuid(char *uuid_str)
 	u8 uuid[16];
 
 	/* Pack the requested UUID in the expected format. */
-	part_pack_uuid(uuid_str, uuid);
+	part_pack_uuid((unsigned char *)uuid_str, uuid);
 
 	dev = class_find_device(&block_class, NULL, uuid, &match_dev_by_uuid);
 	if (!dev)

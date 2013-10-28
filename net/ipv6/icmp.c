@@ -267,7 +267,7 @@ static int icmpv6_getfrag(void *from, char *to, int offset, int len, int odd, st
 	__wsum csum = 0;
 
 	csum = skb_copy_and_csum_bits(org_skb, msg->offset + offset,
-				      to, len, csum);
+				      (unsigned char *)to, len, csum);
 	skb->csum = csum_block_add(skb->csum, csum, odd);
 	if (!(msg->type & ICMPV6_INFOMSG_MASK))
 		nf_ct_attach(skb, org_skb);

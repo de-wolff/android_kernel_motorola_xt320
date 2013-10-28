@@ -709,11 +709,11 @@ ip_generic_getfrag(void *from, char *to, int offset, int len, int odd, struct sk
 	struct iovec *iov = from;
 
 	if (skb->ip_summed == CHECKSUM_PARTIAL) {
-		if (memcpy_fromiovecend(to, iov, offset, len) < 0)
+		if (memcpy_fromiovecend((unsigned char *)to, iov, offset, len) < 0)
 			return -EFAULT;
 	} else {
 		__wsum csum = 0;
-		if (csum_partial_copy_fromiovecend(to, iov, offset, len, &csum) < 0)
+		if (csum_partial_copy_fromiovecend((unsigned char *)to, iov, offset, len, &csum) < 0)
 			return -EFAULT;
 		skb->csum = csum_block_add(skb->csum, csum, odd);
 	}
@@ -977,7 +977,7 @@ alloc_new_skb:
 			/*
 			 *	Find where to start putting bytes.
 			 */
-			data = skb_put(skb, fraglen);
+			data = (char *)skb_put(skb, fraglen);
 			skb_set_network_header(skb, exthdrlen);
 			skb->transport_header = (skb->network_header +
 						 fragheaderlen);
@@ -986,7 +986,7 @@ alloc_new_skb:
 			if (fraggap) {
 				skb->csum = skb_copy_and_csum_bits(
 					skb_prev, maxfraglen,
-					data + transhdrlen, fraggap, 0);
+					(unsigned char *)(data + transhdrlen), fraggap, 0);
 				skb_prev->csum = csum_sub(skb_prev->csum,
 							  skb->csum);
 				data += fraggap;
@@ -1020,7 +1020,7 @@ alloc_new_skb:
 			unsigned int off;
 
 			off = skb->len;
-			if (getfrag(from, skb_put(skb, copy),
+			if (getfrag(from, (char *)skb_put(skb, copy),
 					offset, copy, off, skb) < 0) {
 				__skb_trim(skb, off);
 				err = -EFAULT;

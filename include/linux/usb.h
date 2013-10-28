@@ -295,7 +295,7 @@ struct usb_host_config {
 int __usb_get_extra_descriptor(char *buffer, unsigned size,
 	unsigned char type, void **ptr);
 #define usb_get_extra_descriptor(ifpoint, type, ptr) \
-				__usb_get_extra_descriptor((ifpoint)->extra, \
+				__usb_get_extra_descriptor((char *)(ifpoint)->extra, \
 				(ifpoint)->extralen, \
 				type, (void **)ptr)
 

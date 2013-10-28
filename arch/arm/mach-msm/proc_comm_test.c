@@ -74,7 +74,7 @@ static ssize_t debug_write(struct file *fp, const char __user *buf,
 		len--;
 	}
 
-	if (!strncmp(cmd, "reverse_test", 64))
+	if (!strncmp((char *)cmd, "reverse_test", 64))
 		proc_comm_test_res = proc_comm_reverse_test();
 	else
 		proc_comm_test_res = -EINVAL;

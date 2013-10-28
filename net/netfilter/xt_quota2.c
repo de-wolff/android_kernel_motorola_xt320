@@ -39,7 +39,7 @@ struct xt_quota_counter {
 #ifdef CONFIG_NETFILTER_XT_MATCH_QUOTA2_LOG
 /* Harald's favorite number +1 :D From ipt_ULOG.C */
 static int qlog_nl_event = 112;
-module_param_named(event_num, qlog_nl_event, uint, S_IRUGO | S_IWUSR);
+module_param_named(event_num, qlog_nl_event, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(event_num,
 		 "Event number for NETLINK_NFLOG message. 0 disables log."
 		 "111 is what ipt_ULOG uses.");

@@ -157,7 +157,7 @@ static int eseqiv_givencrypt_first(struct skcipher_givcrypt_request *req)
 		goto unlock;
 
 	crypto_ablkcipher_crt(geniv)->givencrypt = eseqiv_givencrypt;
-	err = crypto_rng_get_bytes(crypto_default_rng, ctx->salt,
+	err = crypto_rng_get_bytes(crypto_default_rng, (unsigned char *)ctx->salt,
 				   crypto_ablkcipher_ivsize(geniv));
 
 unlock:

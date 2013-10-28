@@ -92,7 +92,7 @@ static int chainiv_givencrypt_first(struct skcipher_givcrypt_request *req)
 		goto unlock;
 
 	crypto_ablkcipher_crt(geniv)->givencrypt = chainiv_givencrypt;
-	err = crypto_rng_get_bytes(crypto_default_rng, ctx->iv,
+	err = crypto_rng_get_bytes(crypto_default_rng, (unsigned char *)ctx->iv,
 				   crypto_ablkcipher_ivsize(geniv));
 
 unlock:
@@ -219,7 +219,7 @@ static int async_chainiv_givencrypt_first(struct skcipher_givcrypt_request *req)
 		goto unlock;
 
 	crypto_ablkcipher_crt(geniv)->givencrypt = async_chainiv_givencrypt;
-	err = crypto_rng_get_bytes(crypto_default_rng, ctx->iv,
+	err = crypto_rng_get_bytes(crypto_default_rng, (unsigned char *)ctx->iv,
 				   crypto_ablkcipher_ivsize(geniv));
 
 unlock:

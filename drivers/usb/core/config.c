@@ -734,7 +734,7 @@ int usb_get_configuration(struct usb_device *dev)
 			length = result;
 		}
 
-		dev->rawdescriptors[cfgno] = bigbuffer;
+		dev->rawdescriptors[cfgno] = (char *)bigbuffer;
 
 		result = usb_parse_configuration(dev, cfgno,
 		    &dev->config[cfgno], bigbuffer, length);

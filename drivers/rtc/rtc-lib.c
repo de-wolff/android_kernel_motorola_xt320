@@ -123,7 +123,7 @@ EXPORT_SYMBOL(rtc_tm_to_time);
 ktime_t rtc_tm_to_ktime(struct rtc_time tm)
 {
 	time_t time;
-	rtc_tm_to_time(&tm, &time);
+	rtc_tm_to_time(&tm, (unsigned long *)&time);
 	return ktime_set(time, 0);
 }
 EXPORT_SYMBOL_GPL(rtc_tm_to_ktime);

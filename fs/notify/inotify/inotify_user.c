@@ -647,7 +647,7 @@ static int inotify_new_watch(struct fsnotify_group *group,
 	if (atomic_read(&group->inotify_data.user->inotify_watches) >= inotify_max_user_watches)
 		goto out_err;
 
-	ret = inotify_add_to_idr(idr, idr_lock, &group->inotify_data.last_wd,
+	ret = inotify_add_to_idr(idr, idr_lock, (int *)&group->inotify_data.last_wd,
 				 tmp_i_mark);
 	if (ret)
 		goto out_err;

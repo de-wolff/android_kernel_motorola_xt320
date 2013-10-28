@@ -687,7 +687,7 @@ extern uint sd_hiok;	/* Ok to use hi-speed mode */
 module_param(sd_hiok, uint, 0);
 
 extern uint sd_f2_blocksize;
-module_param(sd_f2_blocksize, int, 0);
+module_param(sd_f2_blocksize, uint, 0);
 
 
 #ifdef BCMSDH_MODULE

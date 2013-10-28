@@ -155,8 +155,8 @@ static int uni16_to_x8(unsigned char *ascii, const wchar_t *uni, int len,
 		} else {
 			if (uni_xlate == 1) {
 				*op++ = ':';
-				op = pack_hex_byte(op, ec >> 8);
-				op = pack_hex_byte(op, ec);
+				op = (unsigned char *)pack_hex_byte((char *)op, ec >> 8);
+				op = (unsigned char *)pack_hex_byte((char *)op, ec);
 				len -= 5;
 			} else {
 				*op++ = '?';
@@ -398,7 +398,7 @@ parse_record:
 			i += chl;
 		}
 		j = last_u;
-		fat_short2uni(nls_disk, ".", 1, &bufuname[j++]);
+		fat_short2uni(nls_disk, (unsigned char *)".", 1, &bufuname[j++]);
 		for (i = 8; i < MSDOS_NAME;) {
 			if (!work[i])
 				break;
@@ -590,7 +590,7 @@ parse_record:
 	}
 	i = last;
 	j = last_u;
-	fat_short2uni(nls_disk, ".", 1, &bufuname[j++]);
+	fat_short2uni(nls_disk, (unsigned char *)".", 1, &bufuname[j++]);
 	ptname[i++] = '.';
 	for (i2 = 8; i2 < MSDOS_NAME;) {
 		if (!(c = work[i2]))
@@ -629,12 +629,12 @@ parse_record:
 
 		p->longname = fill_name;
 		p->long_len = fill_len;
-		p->shortname = bufname;
+		p->shortname = (char *) bufname;
 		p->short_len = i;
 		fill_name = NULL;
 		fill_len = 0;
 	} else {
-		fill_name = bufname;
+		fill_name = (const char *) bufname;
 		fill_len = i;
 	}
 
@@ -872,7 +872,7 @@ int fat_get_dotdot_entry(struct inode *dir, struct buffer_head **bh,
 	offset = 0;
 	*bh = NULL;
 	while (fat_get_short_entry(dir, &offset, bh, de) >= 0) {
-		if (!strncmp((*de)->name, MSDOS_DOTDOT, MSDOS_NAME)) {
+		if (!strncmp((const char *)(*de)->name, MSDOS_DOTDOT, MSDOS_NAME)) {
 			*i_pos = fat_make_i_pos(dir->i_sb, *bh, *de);
 			return 0;
 		}
@@ -893,8 +893,8 @@ int fat_dir_empty(struct inode *dir)
 	bh = NULL;
 	cpos = 0;
 	while (fat_get_short_entry(dir, &cpos, &bh, &de) >= 0) {
-		if (strncmp(de->name, MSDOS_DOT   , MSDOS_NAME) &&
-		    strncmp(de->name, MSDOS_DOTDOT, MSDOS_NAME)) {
+		if (strncmp((const char *)de->name, MSDOS_DOT   , MSDOS_NAME) &&
+		    strncmp((const char *)de->name, MSDOS_DOTDOT, MSDOS_NAME)) {
 			result = -ENOTEMPTY;
 			break;
 		}
@@ -939,7 +939,7 @@ int fat_scan(struct inode *dir, const unsigned char *name,
 	sinfo->bh = NULL;
 	while (fat_get_short_entry(dir, &sinfo->slot_off, &sinfo->bh,
 				   &sinfo->de) >= 0) {
-		if (!strncmp(sinfo->de->name, name, MSDOS_NAME)) {
+		if (!strncmp((const char *)sinfo->de->name, (const char *)name, MSDOS_NAME)) {
 			sinfo->slot_off -= sizeof(*sinfo->de);
 			sinfo->nr_slots = 1;
 			sinfo->i_pos = fat_make_i_pos(sb, sinfo->bh, sinfo->de);

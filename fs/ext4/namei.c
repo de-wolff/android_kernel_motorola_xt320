@@ -370,7 +370,7 @@ dx_probe(const struct qstr *d_name, struct inode *dir,
 		hinfo->hash_version += EXT4_SB(dir->i_sb)->s_hash_unsigned;
 	hinfo->seed = EXT4_SB(dir->i_sb)->s_hash_seed;
 	if (d_name)
-		ext4fs_dirhash(d_name->name, d_name->len, hinfo);
+		ext4fs_dirhash((const char *)d_name->name, d_name->len, hinfo);
 	hash = hinfo->hash;
 
 	if (root->info.unused_flags & 1) {
@@ -808,7 +808,7 @@ static inline int search_dirblock(struct buffer_head *bh,
 	struct ext4_dir_entry_2 * de;
 	char * dlimit;
 	int de_len;
-	const char *name = d_name->name;
+	const char *name = (const char *)d_name->name;
 	int namelen = d_name->len;
 
 	de = (struct ext4_dir_entry_2 *) bh->b_data;
@@ -1055,7 +1055,7 @@ struct dentry *ext4_get_parent(struct dentry *child)
 {
 	__u32 ino;
 	static const struct qstr dotdot = {
-		.name = "..",
+		.name = (const unsigned char *)"..",
 		.len = 2,
 	};
 	struct ext4_dir_entry_2 * de;
@@ -1256,7 +1256,7 @@ static int add_dirent_to_buf(handle_t *handle, struct dentry *dentry,
 			     struct buffer_head *bh)
 {
 	struct inode	*dir = dentry->d_parent->d_inode;
-	const char	*name = dentry->d_name.name;
+	const char	*name = (const char *)dentry->d_name.name;
 	int		namelen = dentry->d_name.len;
 	unsigned int	offset = 0;
 	unsigned int	blocksize = dir->i_sb->s_blocksize;
@@ -1337,7 +1337,7 @@ static int make_indexed_dir(handle_t *handle, struct dentry *dentry,
 			    struct inode *inode, struct buffer_head *bh)
 {
 	struct inode	*dir = dentry->d_parent->d_inode;
-	const char	*name = dentry->d_name.name;
+	const char	*name = (const char *)dentry->d_name.name;
 	int		namelen = dentry->d_name.len;
 	struct buffer_head *bh2;
 	struct dx_root	*root;
@@ -1842,14 +1842,14 @@ retry:
 	de->name_len = 1;
 	de->rec_len = ext4_rec_len_to_disk(EXT4_DIR_REC_LEN(de->name_len),
 					   blocksize);
-	strcpy(de->name, ".");
+	strcpy((char *)de->name, ".");
 	ext4_set_de_type(dir->i_sb, de, S_IFDIR);
 	de = ext4_next_entry(de, blocksize);
 	de->inode = cpu_to_le32(dir->i_ino);
 	de->rec_len = ext4_rec_len_to_disk(blocksize - EXT4_DIR_REC_LEN(1),
 					   blocksize);
 	de->name_len = 2;
-	strcpy(de->name, "..");
+	strcpy((char *)de->name, "..");
 	ext4_set_de_type(dir->i_sb, de, S_IFDIR);
 	inode->i_nlink = 2;
 	BUFFER_TRACE(dir_block, "call ext4_handle_dirty_metadata");
@@ -1909,8 +1909,8 @@ static int empty_dir(struct inode *inode)
 	de1 = ext4_next_entry(de, sb->s_blocksize);
 	if (le32_to_cpu(de->inode) != inode->i_ino ||
 			!le32_to_cpu(de1->inode) ||
-			strcmp(".", de->name) ||
-			strcmp("..", de1->name)) {
+			strcmp(".", (const char *)de->name) ||
+			strcmp("..", (const char *)de1->name)) {
 		ext4_warning(inode->i_sb,
 			     "bad directory (dir #%lu) - no `.' or `..'",
 			     inode->i_ino);
@@ -2447,7 +2447,7 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 	 */
 	if (le32_to_cpu(old_de->inode) != old_inode->i_ino ||
 	    old_de->name_len != old_dentry->d_name.len ||
-	    strncmp(old_de->name, old_dentry->d_name.name, old_de->name_len) ||
+	    strncmp((const char *)old_de->name, (const char *)old_dentry->d_name.name, old_de->name_len) ||
 	    (retval = ext4_delete_entry(handle, old_dir,
 					old_de, old_bh)) == -ENOENT) {
 		/* old_de could have moved from under us during htree split, so

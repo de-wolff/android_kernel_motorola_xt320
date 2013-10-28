@@ -67,7 +67,7 @@ struct footswitch {
 	bool					is_rate_set;
 };
 
-static inline int set_rail_mode(int pcom_id, int mode)
+static inline int set_rail_mode(unsigned int pcom_id, unsigned int mode)
 {
 	int  rc;
 
@@ -78,7 +78,7 @@ static inline int set_rail_mode(int pcom_id, int mode)
 	return rc;
 }
 
-static inline int set_rail_state(int pcom_id, int state)
+static inline int set_rail_state(unsigned int pcom_id, int state)
 {
 	int  rc;
 

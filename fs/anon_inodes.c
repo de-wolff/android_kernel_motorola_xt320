@@ -101,7 +101,7 @@ struct file *anon_inode_getfile(const char *name,
 	 * using the inode sequence number.
 	 */
 	error = -ENOMEM;
-	this.name = name;
+	this.name = (unsigned char *)name;
 	this.len = strlen(name);
 	this.hash = 0;
 	path.dentry = d_alloc_pseudo(anon_inode_mnt->mnt_sb, &this);

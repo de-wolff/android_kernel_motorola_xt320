@@ -257,7 +257,7 @@ static int sysfs_dentry_revalidate(struct dentry *dentry, struct nameidata *nd)
 		goto out_bad;
 
 	/* The sysfs dirent has been renamed */
-	if (strcmp(dentry->d_name.name, sd->s_name) != 0)
+	if (strcmp((const char *)dentry->d_name.name, sd->s_name) != 0)
 		goto out_bad;
 
 	mutex_unlock(&sysfs_mutex);
@@ -384,7 +384,7 @@ int __sysfs_add_one(struct sysfs_addrm_cxt *acxt, struct sysfs_dirent *sd)
 {
 	struct sysfs_inode_attrs *ps_iattr;
 
-	if (sysfs_find_dirent(acxt->parent_sd, sd->s_ns, sd->s_name))
+	if (sysfs_find_dirent(acxt->parent_sd, sd->s_ns, (unsigned char *)sd->s_name))
 		return -EEXIST;
 
 	sd->s_parent = sysfs_get(acxt->parent_sd);
@@ -545,7 +545,7 @@ struct sysfs_dirent *sysfs_find_dirent(struct sysfs_dirent *parent_sd,
 	for (sd = parent_sd->s_dir.children; sd; sd = sd->s_sibling) {
 		if (ns && sd->s_ns && (sd->s_ns != ns))
 			continue;
-		if (!strcmp(sd->s_name, name))
+		if (!strcmp(sd->s_name, (const char *)name))
 			return sd;
 	}
 	return NULL;
@@ -800,7 +800,7 @@ int sysfs_rename(struct sysfs_dirent *sd,
 		goto out;	/* nothing to rename */
 
 	error = -EEXIST;
-	if (sysfs_find_dirent(new_parent_sd, new_ns, new_name))
+	if (sysfs_find_dirent(new_parent_sd, new_ns, (unsigned char *)new_name))
 		goto out;
 
 	/* rename sysfs_dirent */

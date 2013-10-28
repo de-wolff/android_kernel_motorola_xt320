@@ -832,7 +832,7 @@ int usb_string(struct usb_device *dev, int index, char *buf, size_t size)
 
 	size--;		/* leave room for trailing NULL char in output buffer */
 	err = utf16s_to_utf8s((wchar_t *) &tbuf[2], (err - 2) / 2,
-			UTF16_LITTLE_ENDIAN, buf, size);
+			UTF16_LITTLE_ENDIAN, (unsigned char *)buf, size);
 	buf[err] = 0;
 
 	if (tbuf[1] != USB_DT_STRING)

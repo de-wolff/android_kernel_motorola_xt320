@@ -58,7 +58,7 @@ static int sha1_update(struct shash_desc *desc, const u8 *data,
 		}
 
 		do {
-			sha_transform(sctx->state, src, temp);
+			sha_transform(sctx->state, (void *)src, temp);
 			done += 64;
 			src = data + done;
 		} while (done + 63 < len);

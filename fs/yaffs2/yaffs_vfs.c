@@ -243,17 +243,17 @@ static int yaffs_mknod(struct inode *dir, struct dentry *dentry, int mode,
 		/* Special (socket, fifo, device...) */
 		yaffs_trace(YAFFS_TRACE_OS, "yaffs_mknod: making special");
 		obj =
-		    yaffs_create_special(parent, dentry->d_name.name, mode, uid,
+		    yaffs_create_special(parent, (char *)dentry->d_name.name, mode, uid,
 					 gid, old_encode_dev(rdev));
 		break;
 	case S_IFREG:		/* file          */
 		yaffs_trace(YAFFS_TRACE_OS, "yaffs_mknod: making file");
-		obj = yaffs_create_file(parent, dentry->d_name.name, mode, uid,
+		obj = yaffs_create_file(parent, (char *)dentry->d_name.name, mode, uid,
 					gid);
 		break;
 	case S_IFDIR:		/* directory */
 		yaffs_trace(YAFFS_TRACE_OS, "yaffs_mknod: making directory");
-		obj = yaffs_create_dir(parent, dentry->d_name.name, mode,
+		obj = yaffs_create_dir(parent, (char *)dentry->d_name.name, mode,
 				       uid, gid);
 		break;
 	case S_IFLNK:		/* symlink */
@@ -310,7 +310,7 @@ static int yaffs_link(struct dentry *old_dentry, struct inode *dir,
 
 	if (!S_ISDIR(inode->i_mode))	/* Don't link directories */
 		link =
-		    yaffs_link_obj(yaffs_inode_to_obj(dir), dentry->d_name.name,
+		    yaffs_link_obj(yaffs_inode_to_obj(dir), (char *)dentry->d_name.name,
 				   obj);
 
 	if (link) {
@@ -346,7 +346,7 @@ static int yaffs_symlink(struct inode *dir, struct dentry *dentry,
 
 	dev = yaffs_inode_to_obj(dir)->my_dev;
 	yaffs_gross_lock(dev);
-	obj = yaffs_create_symlink(yaffs_inode_to_obj(dir), dentry->d_name.name,
+	obj = yaffs_create_symlink(yaffs_inode_to_obj(dir), (char *)dentry->d_name.name,
 				   S_IFLNK | S_IRWXUGO, uid, gid, symname);
 	yaffs_gross_unlock(dev);
 
@@ -378,9 +378,9 @@ static struct dentry *yaffs_lookup(struct inode *dir, struct dentry *dentry,
 
 	yaffs_trace(YAFFS_TRACE_OS,
 		"yaffs_lookup for %d:%s",
-		yaffs_inode_to_obj(dir)->obj_id, dentry->d_name.name);
+		yaffs_inode_to_obj(dir)->obj_id, (char *)dentry->d_name.name);
 
-	obj = yaffs_find_by_name(yaffs_inode_to_obj(dir), dentry->d_name.name);
+	obj = yaffs_find_by_name(yaffs_inode_to_obj(dir), (char *)dentry->d_name.name);
 
 	obj = yaffs_get_equivalent_obj(obj);	/* in case it was a hardlink */
 
@@ -426,7 +426,7 @@ static int yaffs_unlink(struct inode *dir, struct dentry *dentry)
 
 	yaffs_gross_lock(dev);
 
-	ret_val = yaffs_unlinker(obj, dentry->d_name.name);
+	ret_val = yaffs_unlinker(obj, (char *)dentry->d_name.name);
 
 	if (ret_val == YAFFS_OK) {
 		dentry->d_inode->i_nlink--;
@@ -476,7 +476,7 @@ static int yaffs_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	/* Check if the target is an existing directory that is not empty. */
 	target = yaffs_find_by_name(yaffs_inode_to_obj(new_dir),
-				    new_dentry->d_name.name);
+				    (char *)new_dentry->d_name.name);
 
 	if (target && target->variant_type == YAFFS_OBJECT_TYPE_DIRECTORY &&
 	    !list_empty(&target->variant.dir_variant.children)) {
@@ -489,9 +489,9 @@ static int yaffs_rename(struct inode *old_dir, struct dentry *old_dentry,
 		yaffs_trace(YAFFS_TRACE_OS, "calling yaffs_rename_obj");
 
 		ret_val = yaffs_rename_obj(yaffs_inode_to_obj(old_dir),
-					   old_dentry->d_name.name,
+					   (char *)old_dentry->d_name.name,
 					   yaffs_inode_to_obj(new_dir),
-					   new_dentry->d_name.name);
+					   (char *)new_dentry->d_name.name);
 	}
 	yaffs_gross_unlock(dev);
 
@@ -1016,7 +1016,7 @@ static struct export_operations yaffs_export_ops = {
 static int yaffs_readlink(struct dentry *dentry, char __user * buffer,
 			  int buflen)
 {
-	unsigned char *alias;
+	char *alias;
 	int ret;
 
 	struct yaffs_dev *dev = yaffs_dentry_to_obj(dentry)->my_dev;
@@ -1037,7 +1037,7 @@ static int yaffs_readlink(struct dentry *dentry, char __user * buffer,
 
 static void *yaffs_follow_link(struct dentry *dentry, struct nameidata *nd)
 {
-	unsigned char *alias;
+	char *alias;
 	void *ret;
 	struct yaffs_dev *dev = yaffs_dentry_to_obj(dentry)->my_dev;
 
@@ -1253,7 +1253,7 @@ static int yaffs_writepage(struct page *page, struct writeback_control *wbc)
 		"writepag0: obj = %05x, ino = %05x",
 		(int)obj->variant.file_variant.file_size, (int)inode->i_size);
 
-	n_written = yaffs_wr_file(obj, buffer,
+	n_written = yaffs_wr_file(obj, (unsigned char *)buffer,
 				  page->index << PAGE_CACHE_SHIFT, n_bytes, 0);
 
 	yaffs_touch_super(dev);
@@ -1398,7 +1398,7 @@ static ssize_t yaffs_file_write(struct file *f, const char *buf, size_t n,
 			"yaffs_file_write about to write writing %u(%x) bytes to object %d at %d(%x)",
 			(unsigned)n, (unsigned)n, obj->obj_id, ipos, ipos);
 
-	n_written = yaffs_wr_file(obj, buf, ipos, n, 0);
+	n_written = yaffs_wr_file(obj, (unsigned char *)buf, ipos, n, 0);
 
 	yaffs_touch_super(dev);
 

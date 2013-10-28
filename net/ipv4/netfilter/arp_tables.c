@@ -180,7 +180,7 @@ static inline int arp_packet_match(const struct arphdr *arphdr,
 	}
 
 	/* Look for ifname matches.  */
-	ret = ifname_compare(indev, arpinfo->iniface, arpinfo->iniface_mask);
+	ret = ifname_compare(indev, arpinfo->iniface, (const char *)arpinfo->iniface_mask);
 
 	if (FWINV(ret != 0, ARPT_INV_VIA_IN)) {
 		dprintf("VIA in mismatch (%s vs %s).%s\n",
@@ -189,7 +189,7 @@ static inline int arp_packet_match(const struct arphdr *arphdr,
 		return 0;
 	}
 
-	ret = ifname_compare(outdev, arpinfo->outiface, arpinfo->outiface_mask);
+	ret = ifname_compare(outdev, arpinfo->outiface, (const char *)arpinfo->outiface_mask);
 
 	if (FWINV(ret != 0, ARPT_INV_VIA_OUT)) {
 		dprintf("VIA out mismatch (%s vs %s).%s\n",

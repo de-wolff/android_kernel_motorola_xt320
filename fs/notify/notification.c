@@ -368,7 +368,7 @@ struct fsnotify_event *fsnotify_clone_event(struct fsnotify_event *old_event)
 	initialize_event(event);
 
 	if (event->name_len) {
-		event->file_name = kstrdup(old_event->file_name, GFP_KERNEL);
+		event->file_name = (unsigned char *)kstrdup((const char *)old_event->file_name, GFP_KERNEL);
 		if (!event->file_name) {
 			kmem_cache_free(fsnotify_event_cachep, event);
 			return NULL;
@@ -409,12 +409,12 @@ struct fsnotify_event *fsnotify_create_event(struct inode *to_tell, __u32 mask, 
 	initialize_event(event);
 
 	if (name) {
-		event->file_name = kstrdup(name, gfp);
+		event->file_name = (unsigned char *)kstrdup((const char *)name, gfp);
 		if (!event->file_name) {
 			kmem_cache_free(fsnotify_event_cachep, event);
 			return NULL;
 		}
-		event->name_len = strlen(event->file_name);
+		event->name_len = strlen((const char *)event->file_name);
 	}
 
 	event->tgid = get_pid(task_tgid(current));

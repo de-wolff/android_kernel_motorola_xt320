@@ -353,7 +353,7 @@ static struct file_system_type sock_fs_type = {
 
 static int sock_alloc_file(struct socket *sock, struct file **f, int flags)
 {
-	struct qstr name = { .name = "" };
+	struct qstr name = { .name = (unsigned char *)"" };
 	struct path path;
 	struct file *file;
 	int fd;

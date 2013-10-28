@@ -1035,7 +1035,7 @@ struct v4l2_ctrl *v4l2_ctrl_new_custom(struct v4l2_ctrl_handler *hdl,
 	s32 def = cfg->def;
 
 	if (name == NULL)
-		v4l2_ctrl_fill(cfg->id, &name, &type, &min, &max, &step,
+		v4l2_ctrl_fill(cfg->id, &name, &type, &min, &max, (s32 *)&step,
 								&def, &flags);
 
 	is_menu = (cfg->type == V4L2_CTRL_TYPE_MENU);
@@ -1067,7 +1067,7 @@ struct v4l2_ctrl *v4l2_ctrl_new_std(struct v4l2_ctrl_handler *hdl,
 	enum v4l2_ctrl_type type;
 	u32 flags;
 
-	v4l2_ctrl_fill(id, &name, &type, &min, &max, &step, &def, &flags);
+	v4l2_ctrl_fill(id, &name, &type, &min, &max, (s32 *)&step, &def, &flags);
 	if (type == V4L2_CTRL_TYPE_MENU) {
 		handler_set_err(hdl, -EINVAL);
 		return NULL;
@@ -1089,7 +1089,7 @@ struct v4l2_ctrl *v4l2_ctrl_new_std_menu(struct v4l2_ctrl_handler *hdl,
 	s32 step;
 	u32 flags;
 
-	v4l2_ctrl_fill(id, &name, &type, &min, &max, &step, &def, &flags);
+	v4l2_ctrl_fill(id, &name, &type, &min, &max, (s32 *)&step, &def, &flags);
 	if (type != V4L2_CTRL_TYPE_MENU) {
 		handler_set_err(hdl, -EINVAL);
 		return NULL;
@@ -1348,7 +1348,7 @@ int v4l2_queryctrl(struct v4l2_ctrl_handler *hdl, struct v4l2_queryctrl *qc)
 		qc->id = id;
 	else
 		qc->id = ctrl->id;
-	strlcpy(qc->name, ctrl->name, sizeof(qc->name));
+	strlcpy((char *)qc->name, (const char *)ctrl->name, sizeof(qc->name));
 	qc->minimum = ctrl->minimum;
 	qc->maximum = ctrl->maximum;
 	qc->default_value = ctrl->default_value;
@@ -1389,7 +1389,7 @@ int v4l2_querymenu(struct v4l2_ctrl_handler *hdl, struct v4l2_querymenu *qm)
 	/* Empty menu items should also be skipped */
 	if (ctrl->qmenu[i] == NULL || ctrl->qmenu[i][0] == '\0')
 		return -EINVAL;
-	strlcpy(qm->name, ctrl->qmenu[i], sizeof(qm->name));
+	strlcpy((char *)qm->name, ctrl->qmenu[i], sizeof(qm->name));
 	return 0;
 }
 EXPORT_SYMBOL(v4l2_querymenu);

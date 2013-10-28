@@ -436,7 +436,7 @@ static int pmic_rpc_set_only(uint data0, uint data1, uint data2, uint data3,
 		return stat;
 	}
 
-	pmic_pull_rx_data(rp, &stat);	/* result from server */
+	pmic_pull_rx_data(rp, (unsigned int *)&stat);	/* result from server */
 
 	mutex_unlock(&pmic_mtx);
 
@@ -498,7 +498,7 @@ static int pmic_rpc_set_struct(int xflag, uint xdata, uint *data, uint size,
 		return stat;
 	}
 
-	pmic_pull_rx_data(rp, &stat);	/* result from server */
+	pmic_pull_rx_data(rp, (unsigned int *) &stat);	/* result from server */
 
 	mutex_unlock(&pmic_mtx);
 
@@ -556,8 +556,8 @@ static int pmic_rpc_set_get(uint setdata, uint *getdata, int size, int proc)
 		return stat;
 	}
 
-	pmic_pull_rx_data(rp, &stat);		/* result from server */
-	pmic_pull_rx_data(rp, &more_data);
+	pmic_pull_rx_data(rp, (unsigned int *) &stat);		/* result from server */
+	pmic_pull_rx_data(rp, (unsigned int *) &more_data);
 
 	if (more_data) { 				/* more data followed */
 		size >>= 2;
@@ -621,8 +621,8 @@ static int pmic_rpc_get_only(uint *getdata, int size, int proc)
 		return stat;
 	}
 
-	pmic_pull_rx_data(rp, &stat);		/* result from server */
-	pmic_pull_rx_data(rp, &more_data);
+	pmic_pull_rx_data(rp, (unsigned int *) &stat);		/* result from server */
+	pmic_pull_rx_data(rp, (unsigned int *) &more_data);
 
 	if (more_data) { 				/* more data followed */
 		size >>= 2;

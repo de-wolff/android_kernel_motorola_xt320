@@ -196,7 +196,7 @@ static void hidp_input_report(struct hidp_session *session, struct sk_buff *skb)
 	struct input_dev *dev = session->input;
 	unsigned char *keys = session->keys;
 	unsigned char *udata = skb->data + 1;
-	signed char *sdata = skb->data + 1;
+	signed char *sdata = (signed char *)(skb->data + 1);
 	int i, size = skb->len - 1;
 
 	switch (skb->data[0]) {

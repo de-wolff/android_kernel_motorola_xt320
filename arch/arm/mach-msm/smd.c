@@ -1316,7 +1316,7 @@ static inline void notify_loopback_smd(void)
 static int smd_alloc_loopback_channel(void)
 {
 	static struct smd_half_channel smd_loopback_ctl;
-	static char smd_loopback_data[SMD_BUF_SIZE];
+	static unsigned char smd_loopback_data[SMD_BUF_SIZE];
 	struct smd_channel *ch;
 
 	ch = kzalloc(sizeof(struct smd_channel), GFP_KERNEL);

@@ -242,9 +242,9 @@ static const DECLARE_TLV_DB_LINEAR(db_scale_linear, -5000, 1800);
 }
 
 static struct snd_kcontrol_new snd_msm_controls[] = {
-	MSM_EXT_TLV("PCM Playback Volume", 0, snd_msm_volume_info, \
+	MSM_EXT_TLV((unsigned char *)"PCM Playback Volume", 0, snd_msm_volume_info, \
 	snd_msm_volume_get, snd_msm_volume_put, 0, db_scale_linear),
-	MSM_EXT("device", 1, snd_msm_device_info, snd_msm_device_get, \
+	MSM_EXT((unsigned char *)"device", 1, snd_msm_device_info, snd_msm_device_get, \
 						 snd_msm_device_put, 0),
 };
 

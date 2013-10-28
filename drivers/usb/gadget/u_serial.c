@@ -575,7 +575,7 @@ static void gs_rx_push(struct work_struct *w)
 				size -= n;
 			}
 
-			count = tty_insert_flip_string(tty, packet, size);
+			count = tty_insert_flip_string(tty, (unsigned char *)packet, size);
 			port->nbytes_to_tty += count;
 			if (count)
 				do_push = true;
@@ -985,7 +985,7 @@ static int gs_write(struct tty_struct *tty, const unsigned char *buf, int count)
 
 	spin_lock_irqsave(&port->port_lock, flags);
 	if (count)
-		count = gs_buf_put(&port->port_write_buf, buf, count);
+		count = gs_buf_put(&port->port_write_buf, (const char *)buf, count);
 	/* treat count == 0 as flush_chars() */
 	if (port->port_usb)
 		status = gs_start_tx(port);
@@ -1004,7 +1004,7 @@ static int gs_put_char(struct tty_struct *tty, unsigned char ch)
 		port->port_num, tty, ch, __builtin_return_address(0));
 
 	spin_lock_irqsave(&port->port_lock, flags);
-	status = gs_buf_put(&port->port_write_buf, &ch, 1);
+	status = gs_buf_put(&port->port_write_buf, (char *)&ch, 1);
 	spin_unlock_irqrestore(&port->port_lock, flags);
 
 	return status;

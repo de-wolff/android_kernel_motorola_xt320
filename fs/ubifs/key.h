@@ -153,7 +153,7 @@ static inline void dent_key_init(const struct ubifs_info *c,
 				 union ubifs_key *key, ino_t inum,
 				 const struct qstr *nm)
 {
-	uint32_t hash = c->key_hash(nm->name, nm->len);
+	uint32_t hash = c->key_hash((char *)nm->name, nm->len);
 
 	ubifs_assert(!(hash & ~UBIFS_S_KEY_HASH_MASK));
 	key->u32[0] = inum;
@@ -188,7 +188,7 @@ static inline void dent_key_init_flash(const struct ubifs_info *c, void *k,
 				       ino_t inum, const struct qstr *nm)
 {
 	union ubifs_key *key = k;
-	uint32_t hash = c->key_hash(nm->name, nm->len);
+	uint32_t hash = c->key_hash((char *)nm->name, nm->len);
 
 	ubifs_assert(!(hash & ~UBIFS_S_KEY_HASH_MASK));
 	key->j32[0] = cpu_to_le32(inum);
@@ -221,7 +221,7 @@ static inline void xent_key_init(const struct ubifs_info *c,
 				 union ubifs_key *key, ino_t inum,
 				 const struct qstr *nm)
 {
-	uint32_t hash = c->key_hash(nm->name, nm->len);
+	uint32_t hash = c->key_hash((char *)nm->name, nm->len);
 
 	ubifs_assert(!(hash & ~UBIFS_S_KEY_HASH_MASK));
 	key->u32[0] = inum;
@@ -239,7 +239,7 @@ static inline void xent_key_init_flash(const struct ubifs_info *c, void *k,
 				       ino_t inum, const struct qstr *nm)
 {
 	union ubifs_key *key = k;
-	uint32_t hash = c->key_hash(nm->name, nm->len);
+	uint32_t hash = c->key_hash((char *)nm->name, nm->len);
 
 	ubifs_assert(!(hash & ~UBIFS_S_KEY_HASH_MASK));
 	key->j32[0] = cpu_to_le32(inum);

@@ -378,7 +378,7 @@ struct msm_mapped_buffer *msm_subsystem_map_buffer(unsigned long phys,
 		min_align = flags & ~(SZ_4K - 1);
 
 		for (i = 0; i < nsubsys; i++) {
-			if (!subsys_validate(subsys_ids[i])) {
+			if (!subsys_validate((unsigned int)subsys_ids[i])) {
 				buf->iova[i] = phys;
 				continue;
 			}
@@ -417,7 +417,7 @@ struct msm_mapped_buffer *msm_subsystem_map_buffer(unsigned long phys,
 	}
 
 	node->buf = buf;
-	node->subsystems = subsys_ids;
+	node->subsystems = (unsigned int *)subsys_ids;
 	node->length = length;
 	node->pg_size = pg_size;
 	node->nsubsys = nsubsys;

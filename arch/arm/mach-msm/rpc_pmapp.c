@@ -441,7 +441,7 @@ static int pmapp_rpc_set_only(uint data0, uint data1, uint data2, uint data3,
 	struct pmapp_ctrl *pm = &pmapp_ctrl;
 	struct pmapp_buf	*tp;
 	struct pmapp_buf	*rp;
-	int	stat;
+	unsigned int	stat;
 
 
 	if (mutex_lock_interruptible(&pmapp_mtx))

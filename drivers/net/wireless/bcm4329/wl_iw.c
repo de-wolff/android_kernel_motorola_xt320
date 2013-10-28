@@ -957,11 +957,11 @@ static int set_btc_esco_params(struct net_device *dev, bool trump_sco)
 		WL_TRACE_COEX(("Do new SCO/eSCO coex algo {save & override} \n"));
 
 
-		if  ((!dev_wlc_intvar_get_reg(dev, "btc_params", 50,  &saved_reg50)) &&
-			(!dev_wlc_intvar_get_reg(dev, "btc_params", 51,  &saved_reg51)) &&
-			(!dev_wlc_intvar_get_reg(dev, "btc_params", 64,  &saved_reg64)) &&
-			(!dev_wlc_intvar_get_reg(dev, "btc_params", 65,  &saved_reg65)) &&
-			(!dev_wlc_intvar_get_reg(dev, "btc_params", 71,  &saved_reg71))) {
+		if  ((!dev_wlc_intvar_get_reg(dev, "btc_params", 50,  (int *)&saved_reg50)) &&
+			(!dev_wlc_intvar_get_reg(dev, "btc_params", 51,  (int *)&saved_reg51)) &&
+			(!dev_wlc_intvar_get_reg(dev, "btc_params", 64,  (int *)&saved_reg64)) &&
+			(!dev_wlc_intvar_get_reg(dev, "btc_params", 65,  (int *)&saved_reg65)) &&
+			(!dev_wlc_intvar_get_reg(dev, "btc_params", 71,  (int *)&saved_reg71))) {
 
 			saved_status = TRUE;
 			WL_TRACE_COEX(("%s saved bt_params[50,51,64,65,71]:"
@@ -2267,7 +2267,7 @@ static int iwpriv_set_ap_sta_disassoc(struct net_device *dev,
 
 		if (get_parameter_from_string(&str_ptr,
 			"MAC=", PTYPE_STR_HEX, sta_mac, 12) == 0) {
-			res = wl_iw_softap_deassoc_stations(dev, sta_mac);
+			res = wl_iw_softap_deassoc_stations(dev, (u8 *)sta_mac);
 		} else  {
 			WL_ERROR(("ERROR: STA_MAC= token not found\n"));
 		}
@@ -7010,8 +7010,8 @@ set_ap_cfg(struct net_device *dev, struct ap_profile *ap)
 		goto fail;
 	}
 
-	ap_ssid.SSID_len = strlen(ap->ssid);
-	strncpy(ap_ssid.SSID, ap->ssid, ap_ssid.SSID_len);
+	ap_ssid.SSID_len = strlen((const char *)ap->ssid);
+	strncpy((char *)ap_ssid.SSID, (const char *)ap->ssid, ap_ssid.SSID_len);
 
 	
 #ifdef AP_ONLY
@@ -7150,8 +7150,8 @@ static int set_apsta_cfg(struct net_device *dev, struct ap_profile *ap)
 			goto fail;
 	}
 
-	ap_ssid.SSID_len = strlen(ap->ssid);
-	strncpy(ap_ssid.SSID, ap->ssid, ap_ssid.SSID_len);
+	ap_ssid.SSID_len = strlen((const char *)ap->ssid);
+	strncpy((char *)ap_ssid.SSID, (const char *)ap->ssid, ap_ssid.SSID_len);
 	
 	iolen = wl_bssiovar_mkbuf("ssid", bsscfg_index, (char *)(&ap_ssid),
 		ap_ssid.SSID_len+4, buf, sizeof(buf), &mkvar_err);
@@ -7223,7 +7223,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 	WL_SOFTAP(("	max scb = %d\n", ap->max_scb));
 
 
-	if (strnicmp(ap->sec, "open", strlen("open")) == 0) {
+	if (strnicmp((const char *)ap->sec, "open", strlen("open")) == 0) {
 
 	   
 		wsec = 0;
@@ -7235,7 +7235,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		WL_SOFTAP((" wsec & wpa_auth set 'OPEN', result:%d\n", res));
 		WL_SOFTAP(("=====================\n"));
 
-	} else if (strnicmp(ap->sec, "wep", strlen("wep")) == 0) {
+	} else if (strnicmp((const char *)ap->sec, "wep", strlen("wep")) == 0) {
 
 	   
 		memset(&key, 0, sizeof(key));
@@ -7244,7 +7244,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		res = dev_wlc_intvar_set(dev, "wsec", wsec);
 
 		key.index = 0;
-		if (wl_iw_parse_wep(ap->key, &key)) {
+		if (wl_iw_parse_wep((char *)ap->key, &key)) {
 			WL_SOFTAP(("wep key parse err!\n"));
 			return -1;
 		}
@@ -7263,7 +7263,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		WL_SOFTAP((" wsec & auth set 'WEP', result:&d %d\n", res));
 		WL_SOFTAP(("=====================\n"));
 
-	} else if (strnicmp(ap->sec, "wpa2-psk", strlen("wpa2-psk")) == 0) {
+	} else if (strnicmp((const char *)ap->sec, "wpa2-psk", strlen("wpa2-psk")) == 0) {
 
 	   
 
@@ -7273,7 +7273,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		wsec = AES_ENABLED;
 		dev_wlc_intvar_set(dev, "wsec", wsec);
 
-		key_len = strlen(ap->key);
+		key_len = strlen((const char *)ap->key);
 		if (key_len < WSEC_MIN_PSK_LEN || key_len > WSEC_MAX_PSK_LEN) {
 			WL_SOFTAP(("passphrase must be between %d and %d characters long\n",
 			WSEC_MIN_PSK_LEN, WSEC_MAX_PSK_LEN));
@@ -7287,7 +7287,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 
 			
 			memset(output, 0, sizeof(output));
-			pbkdf2_sha1(ap->key, ap->ssid, strlen(ap->ssid), 4096, output, 32);
+			pbkdf2_sha1((const char *)ap->key, (const char *)ap->ssid, strlen((const char *)ap->ssid), 4096, output, 32);
 			
 			ptr = key_str_buf;
 			for (i = 0; i < (WSEC_MAX_PSK_LEN/8); i++) {
@@ -7311,7 +7311,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		wpa_auth = WPA2_AUTH_PSK;
 		dev_wlc_intvar_set(dev, "wpa_auth", wpa_auth);
 
-	} else if (strnicmp(ap->sec, "wpa-psk", strlen("wpa-psk")) == 0) {
+	} else if (strnicmp((const char *)ap->sec, "wpa-psk", strlen("wpa-psk")) == 0) {
 
 		
 		wsec_pmk_t psk;
@@ -7320,7 +7320,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 		wsec = TKIP_ENABLED;
 		res = dev_wlc_intvar_set(dev, "wsec", wsec);
 
-		key_len = strlen(ap->key);
+		key_len = strlen((const char *)ap->key);
 		if (key_len < WSEC_MIN_PSK_LEN || key_len > WSEC_MAX_PSK_LEN) {
 			WL_SOFTAP(("passphrase must be between %d and %d characters long\n",
 			WSEC_MIN_PSK_LEN, WSEC_MAX_PSK_LEN));
@@ -7335,7 +7335,7 @@ wl_iw_set_ap_security(struct net_device *dev, struct ap_profile *ap)
 
 			WL_SOFTAP(("%s: do passhash...\n", __FUNCTION__));
 			
-			pbkdf2_sha1(ap->key, ap->ssid, strlen(ap->ssid), 4096, output, 32);
+			pbkdf2_sha1((const char *)ap->key, (const char *)ap->ssid, strlen((const char *)ap->ssid), 4096, output, 32);
 			
 			ptr = key_str_buf;
 			for (i = 0; i < (WSEC_MAX_PSK_LEN/8); i++) {
@@ -7471,7 +7471,7 @@ int wl_iw_softap_deassoc_stations(struct net_device *dev, u8 *mac)
 		deauth_all = TRUE;
 		sta_mac = z_mac;  
 	} else {
-		sta_mac = mac;  
+		sta_mac = (char *)mac;  
 	}
 
 	memset(assoc_maclist, 0, sizeof(mac_buf));
@@ -9158,8 +9158,8 @@ wl_iw_apsta_restart(struct work_struct *work)
                         goto fail;
         }
 
-        ap_ssid.SSID_len = strlen(ap->ssid);
-        strncpy(ap_ssid.SSID, ap->ssid, ap_ssid.SSID_len);
+        ap_ssid.SSID_len = strlen((const char *)ap->ssid);
+        strncpy((char *)ap_ssid.SSID, (const char *)ap->ssid, ap_ssid.SSID_len);
 
         iolen = wl_bssiovar_mkbuf("ssid", bsscfg_index, (char *)(&ap_ssid),
                 ap_ssid.SSID_len+4, buf, sizeof(buf), &mkvar_err);

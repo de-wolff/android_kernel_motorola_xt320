@@ -277,11 +277,11 @@ int alsa_adsp_configure(struct msm_audio *prtd)
 	int ret, i;
 
 	if (prtd->dir == SNDRV_PCM_STREAM_PLAYBACK) {
-		prtd->data = prtd->playback_substream->dma_buffer.area;
+		prtd->data = (char *)prtd->playback_substream->dma_buffer.area;
 		prtd->phys = prtd->playback_substream->dma_buffer.addr;
 	}
 	if (prtd->dir == SNDRV_PCM_STREAM_CAPTURE) {
-		prtd->data = prtd->capture_substream->dma_buffer.area;
+		prtd->data = (char *)prtd->capture_substream->dma_buffer.area;
 		prtd->phys = prtd->capture_substream->dma_buffer.addr;
 	}
 	if (!prtd->data) {

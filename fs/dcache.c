@@ -1281,7 +1281,7 @@ static struct shrinker dcache_shrinker = {
 struct dentry *d_alloc(struct dentry * parent, const struct qstr *name)
 {
 	struct dentry *dentry;
-	char *dname;
+	unsigned char *dname;
 
 	dentry = kmem_cache_alloc(dentry_cache, GFP_KERNEL);
 	if (!dentry)
@@ -1355,7 +1355,7 @@ struct dentry *d_alloc_name(struct dentry *parent, const char *name)
 {
 	struct qstr q;
 
-	q.name = name;
+	q.name = (const unsigned char *)name;
 	q.len = strlen(name);
 	q.hash = full_name_hash(q.name, q.len);
 	return d_alloc(parent, &q);
@@ -1446,7 +1446,7 @@ static struct dentry *__d_instantiate_unique(struct dentry *entry,
 {
 	struct dentry *alias;
 	int len = entry->d_name.len;
-	const char *name = entry->d_name.name;
+	const unsigned char *name = entry->d_name.name;
 	unsigned int hash = entry->d_name.hash;
 
 	if (!inode) {
@@ -1514,7 +1514,7 @@ struct dentry * d_alloc_root(struct inode * root_inode)
 	struct dentry *res = NULL;
 
 	if (root_inode) {
-		static const struct qstr name = { .name = "/", .len = 1 };
+		static const struct qstr name = { .name = (const unsigned char *)"/", .len = 1 };
 
 		res = d_alloc(NULL, &name);
 		if (res) {
@@ -1570,7 +1570,7 @@ static struct dentry * d_find_any_alias(struct inode *inode)
  */
 struct dentry *d_obtain_alias(struct inode *inode)
 {
-	static const struct qstr anonstring = { .name = "" };
+	static const struct qstr anonstring = { .name = (const unsigned char *)"" };
 	struct dentry *tmp;
 	struct dentry *res;
 
@@ -1828,7 +1828,7 @@ seqretry:
 		if (d_unhashed(dentry))
 			continue;
 		tlen = dentry->d_name.len;
-		tname = dentry->d_name.name;
+		tname = (const char *)dentry->d_name.name;
 		i = dentry->d_inode;
 		prefetch(tname);
 		if (i)
@@ -1847,7 +1847,7 @@ seqretry:
 						tlen, tname, name))
 				continue;
 		} else {
-			if (dentry_cmp(tname, tlen, str, len))
+			if (dentry_cmp((const unsigned char *)tname, tlen, str, len))
 				continue;
 		}
 		/*
@@ -1936,7 +1936,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 	rcu_read_lock();
 	
 	hlist_bl_for_each_entry_rcu(dentry, node, &b->head, d_hash) {
-		const char *tname;
+		const unsigned char *tname;
 		int tlen;
 
 		if (dentry->d_name.hash != hash)
@@ -1957,7 +1957,7 @@ struct dentry *__d_lookup(struct dentry *parent, struct qstr *name)
 		if (parent->d_flags & DCACHE_OP_COMPARE) {
 			if (parent->d_op->d_compare(parent, parent->d_inode,
 						dentry, dentry->d_inode,
-						tlen, tname, name))
+						tlen, (const char *)tname, name))
 				goto next;
 		} else {
 			if (dentry_cmp(tname, tlen, str, len))
@@ -2484,7 +2484,7 @@ static int prepend(char **buffer, int *buflen, const char *str, int namelen)
 
 static int prepend_name(char **buffer, int *buflen, struct qstr *name)
 {
-	return prepend(buffer, buflen, name->name, name->len);
+	return prepend(buffer, buflen, ( const char *)name->name, name->len);
 }
 
 /**

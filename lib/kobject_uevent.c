@@ -266,13 +266,13 @@ int kobject_uevent_env(struct kobject *kobj, enum kobject_action action,
 			char *scratch;
 
 			/* add header */
-			scratch = skb_put(skb, len);
+			scratch = (char *)skb_put(skb, len);
 			sprintf(scratch, "%s@%s", action_string, devpath);
 
 			/* copy keys to our continuous event payload buffer */
 			for (i = 0; i < env->envp_idx; i++) {
 				len = strlen(env->envp[i]) + 1;
-				scratch = skb_put(skb, len);
+				scratch = (char *)skb_put(skb, len);
 				strcpy(scratch, env->envp[i]);
 			}
 

@@ -251,7 +251,7 @@ static u8 *crypto_authenc_ahash_fb(struct aead_request *req, unsigned int flags)
 	struct crypto_ahash *auth = ctx->auth;
 	struct authenc_request_ctx *areq_ctx = aead_request_ctx(req);
 	struct ahash_request *ahreq = (void *)(areq_ctx->tail + ctx->reqoff);
-	u8 *hash = areq_ctx->tail;
+	u8 *hash = (u8 *)areq_ctx->tail;
 	int err;
 
 	hash = (u8 *)ALIGN((unsigned long)hash + crypto_ahash_alignmask(auth),
@@ -290,7 +290,7 @@ static u8 *crypto_authenc_ahash(struct aead_request *req, unsigned int flags)
 	struct crypto_ahash *auth = ctx->auth;
 	struct authenc_request_ctx *areq_ctx = aead_request_ctx(req);
 	struct ahash_request *ahreq = (void *)(areq_ctx->tail + ctx->reqoff);
-	u8 *hash = areq_ctx->tail;
+	u8 *hash = (u8 *)areq_ctx->tail;
 	int err;
 
 	hash = (u8 *)ALIGN((unsigned long)hash + crypto_ahash_alignmask(auth),

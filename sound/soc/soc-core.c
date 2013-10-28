@@ -2519,7 +2519,7 @@ struct snd_kcontrol *snd_soc_cnew(const struct snd_kcontrol_new *_template,
 
 	memcpy(&template, _template, sizeof(template));
 	if (long_name)
-		template.name = long_name;
+		template.name = (unsigned char *)long_name;
 	template.index = 0;
 
 	return snd_ctl_new1(&template, data);
@@ -2551,7 +2551,7 @@ int snd_soc_add_controls(struct snd_soc_codec *codec,
 				 codec->name_prefix, control->name);
 			name = prefixed_name;
 		} else {
-			name = control->name;
+			name = (char *)control->name;
 		}
 		err = snd_ctl_add(card, snd_soc_cnew(control, codec, name));
 		if (err < 0) {
@@ -2799,7 +2799,7 @@ int snd_soc_info_volsw_ext(struct snd_kcontrol *kcontrol,
 {
 	int max = kcontrol->private_value;
 
-	if (max == 1 && !strstr(kcontrol->id.name, " Volume"))
+	if (max == 1 && !strstr((char *)kcontrol->id.name, " Volume"))
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
 	else
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
@@ -2833,7 +2833,7 @@ int snd_soc_info_volsw(struct snd_kcontrol *kcontrol,
 		mc->platform_max = mc->max;
 	platform_max = mc->platform_max;
 
-	if (platform_max == 1 && !strstr(kcontrol->id.name, " Volume"))
+	if (platform_max == 1 && !strstr((const char *)kcontrol->id.name, " Volume"))
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
 	else
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
@@ -2944,7 +2944,7 @@ int snd_soc_info_volsw_2r(struct snd_kcontrol *kcontrol,
 		mc->platform_max = mc->max;
 	platform_max = mc->platform_max;
 
-	if (platform_max == 1 && !strstr(kcontrol->id.name, " Volume"))
+	if (platform_max == 1 && !strstr((const char *)kcontrol->id.name, " Volume"))
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_BOOLEAN;
 	else
 		uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
@@ -3143,7 +3143,7 @@ int snd_soc_limit_volume(struct snd_soc_codec *codec,
 		return -EINVAL;
 
 	list_for_each_entry(kctl, &card->controls, list) {
-		if (!strncmp(kctl->id.name, name, sizeof(kctl->id.name))) {
+		if (!strncmp((char *)kctl->id.name, name, sizeof(kctl->id.name))) {
 			found = 1;
 			break;
 		}
@@ -3512,7 +3512,7 @@ static char *fmt_single_name(struct device *dev, int *id)
 	strlcpy(name, dev_name(dev), NAME_SIZE);
 
 	/* are we a "%s.%d" name (platform and SPI components) */
-	found = strstr(name, dev->driver->name);
+	found = strstr(name, (const char *)dev->driver->name);
 	if (found) {
 		/* get ID */
 		if (sscanf(&found[strlen(dev->driver->name)], ".%d", id) == 1) {

@@ -83,7 +83,7 @@ static inline void color_imageblit(const struct fb_image *image,
 	int i, n, bpp = p->var.bits_per_pixel;
 	u32 null_bits = 32 - bpp;
 	u32 *palette = (u32 *) p->pseudo_palette;
-	const u8 *src = image->data;
+	const u8 *src = (u8 *)image->data;
 	u32 bswapmask = fb_compute_bswapmask(p);
 
 	dst2 = (u32 __iomem *) dst1;
@@ -145,7 +145,7 @@ static inline void slow_imageblit(const struct fb_image *image, struct fb_info *
 	u32 val, pitch = p->fix.line_length;
 	u32 null_bits = 32 - bpp;
 	u32 spitch = (image->width+7)/8;
-	const u8 *src = image->data, *s;
+	const u8 *src = (u8 *)image->data, *s;
 	u32 i, j, l;
 	u32 bswapmask = fb_compute_bswapmask(p);
 
@@ -279,7 +279,7 @@ void cfb_imageblit(struct fb_info *p, const struct fb_image *image)
 
 	bitstart /= 8;
 	bitstart &= ~(bpl - 1);
-	dst1 = p->screen_base + bitstart;
+	dst1 = (u8 *)(p->screen_base + bitstart);
 
 	if (p->fbops->fb_sync)
 		p->fbops->fb_sync(p);

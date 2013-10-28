@@ -756,7 +756,7 @@ void __init printk_all_partitions(void)
 
 			uuid[0] = 0;
 			if (part->info)
-				part_unpack_uuid(part->info->uuid, uuid);
+				part_unpack_uuid(part->info->uuid, (char *) uuid);
 
 			printk("%s%s %10llu %s %s", is_part0 ? "" : "  ",
 			       bdevt_str(part_devt(part), devt_buf),

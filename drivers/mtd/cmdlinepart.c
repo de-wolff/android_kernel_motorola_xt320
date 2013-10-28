@@ -200,13 +200,13 @@ static struct mtd_partition * newpart(char *s,
 	parts[this_part].mask_flags = mask_flags;
 	if (name)
 	{
-		strlcpy(extra_mem, name, name_len + 1);
+		strlcpy((char *)extra_mem, name, name_len + 1);
 	}
 	else
 	{
-		sprintf(extra_mem, "Partition_%03d", this_part);
+		sprintf((char *)extra_mem, "Partition_%03d", this_part);
 	}
-	parts[this_part].name = extra_mem;
+	parts[this_part].name = (char *)extra_mem;
 	extra_mem += name_len + 1;
 
 	dbg(("partition %d: name <%s>, offset %llx, size %llx, mask flags %x\n",

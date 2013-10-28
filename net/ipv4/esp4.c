@@ -470,7 +470,7 @@ static int esp_init_aead(struct xfrm_state *x)
 
 	esp->aead = aead;
 
-	err = crypto_aead_setkey(aead, x->aead->alg_key,
+	err = crypto_aead_setkey(aead, (unsigned char *)x->aead->alg_key,
 				 (x->aead->alg_key_len + 7) / 8);
 	if (err)
 		goto error;
@@ -554,7 +554,7 @@ static int esp_init_authenc(struct xfrm_state *x)
 	param->enckeylen = cpu_to_be32((x->ealg->alg_key_len + 7) / 8);
 	memcpy(p, x->ealg->alg_key, (x->ealg->alg_key_len + 7) / 8);
 
-	err = crypto_aead_setkey(aead, key, keylen);
+	err = crypto_aead_setkey(aead, (unsigned char *)key, keylen);
 
 free_key:
 	kfree(key);

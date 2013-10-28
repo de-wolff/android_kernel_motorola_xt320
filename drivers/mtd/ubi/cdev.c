@@ -236,7 +236,7 @@ static ssize_t vol_cdev_read(struct file *file, __user char *buf, size_t count,
 		return -ENOMEM;
 
 	len = count > tbuf_size ? tbuf_size : count;
-	lnum = div_u64_rem(*offp, vol->usable_leb_size, &off);
+	lnum = div_u64_rem(*offp, vol->usable_leb_size, (u32 *)&off);
 
 	do {
 		cond_resched();
@@ -294,7 +294,7 @@ static ssize_t vol_cdev_direct_write(struct file *file, const char __user *buf,
 	if (vol->vol_type == UBI_STATIC_VOLUME)
 		return -EROFS;
 
-	lnum = div_u64_rem(*offp, vol->usable_leb_size, &off);
+	lnum = div_u64_rem(*offp, vol->usable_leb_size, (u32 *)&off);
 	if (off & (ubi->min_io_size - 1)) {
 		dbg_err("unaligned position");
 		return -EINVAL;

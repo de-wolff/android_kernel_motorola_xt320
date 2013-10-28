@@ -121,7 +121,7 @@ ip6_packet_match(const struct sk_buff *skb,
 		return false;
 	}
 
-	ret = ifname_compare_aligned(indev, ip6info->iniface, ip6info->iniface_mask);
+	ret = ifname_compare_aligned(indev, ip6info->iniface, (const char *)ip6info->iniface_mask);
 
 	if (FWINV(ret != 0, IP6T_INV_VIA_IN)) {
 		dprintf("VIA in mismatch (%s vs %s).%s\n",
@@ -130,7 +130,7 @@ ip6_packet_match(const struct sk_buff *skb,
 		return false;
 	}
 
-	ret = ifname_compare_aligned(outdev, ip6info->outiface, ip6info->outiface_mask);
+	ret = ifname_compare_aligned(outdev, ip6info->outiface, (const char *)ip6info->outiface_mask);
 
 	if (FWINV(ret != 0, IP6T_INV_VIA_OUT)) {
 		dprintf("VIA out mismatch (%s vs %s).%s\n",
@@ -264,7 +264,7 @@ get_chainname_rulenum(const struct ip6t_entry *s, const struct ip6t_entry *e,
 
 	if (strcmp(t->target.u.kernel.target->name, XT_ERROR_TARGET) == 0) {
 		/* Head of user chain: ERROR target with chainname */
-		*chainname = t->target.data;
+		*chainname = (const char *)t->target.data;
 		(*rulenum) = 0;
 	} else if (s == e) {
 		(*rulenum)++;

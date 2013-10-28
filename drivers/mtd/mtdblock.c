@@ -102,7 +102,7 @@ static int erase_write (struct mtd_info *mtd, unsigned long pos,
 	 * Next, write the data to flash.
 	 */
 
-	ret = mtd->write(mtd, pos, len, &retlen, buf);
+	ret = mtd->write(mtd, pos, len, &retlen, (const unsigned char *)buf);
 	if (ret)
 		return ret;
 	if (retlen != len)
@@ -124,7 +124,7 @@ static int write_cached_data (struct mtdblk_dev *mtdblk)
 			mtdblk->cache_offset, mtdblk->cache_size);
 
 	ret = erase_write (mtd, mtdblk->cache_offset,
-			   mtdblk->cache_size, mtdblk->cache_data);
+			   mtdblk->cache_size, (const char *)mtdblk->cache_data);
 	if (ret)
 		return ret;
 
@@ -152,7 +152,7 @@ static int do_cached_write (struct mtdblk_dev *mtdblk, unsigned long pos,
 		mtd->name, pos, len);
 
 	if (!sect_size)
-		return mtd->write(mtd, pos, len, &retlen, buf);
+		return mtd->write(mtd, pos, len, &retlen, (const unsigned char *)buf);
 
 	while (len > 0) {
 		unsigned long sect_start = (pos/sect_size)*sect_size;
@@ -222,7 +222,7 @@ static int do_cached_read (struct mtdblk_dev *mtdblk, unsigned long pos,
 			mtd->name, pos, len);
 
 	if (!sect_size)
-		return mtd->read(mtd, pos, len, &retlen, buf);
+		return mtd->read(mtd, pos, len, &retlen, (unsigned char *)buf);
 
 	while (len > 0) {
 		unsigned long sect_start = (pos/sect_size)*sect_size;
@@ -241,7 +241,7 @@ static int do_cached_read (struct mtdblk_dev *mtdblk, unsigned long pos,
 		    mtdblk->cache_offset == sect_start) {
 			memcpy (buf, mtdblk->cache_data + offset, size);
 		} else {
-			ret = mtd->read(mtd, pos, size, &retlen, buf);
+			ret = mtd->read(mtd, pos, size, &retlen, (unsigned char *)buf);
 			if (ret)
 				return ret;
 			if (retlen != size)

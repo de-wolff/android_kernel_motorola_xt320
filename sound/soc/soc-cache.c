@@ -60,7 +60,7 @@ static int snd_soc_4_12_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	ret = codec->hw_write(codec->control_data, data, 2);
+	ret = codec->hw_write(codec->control_data, (const char *)data, 2);
 	if (ret == 2)
 		return 0;
 	if (ret < 0)
@@ -141,7 +141,7 @@ static int snd_soc_7_9_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	ret = codec->hw_write(codec->control_data, data, 2);
+	ret = codec->hw_write(codec->control_data, (const char *)data, 2);
 	if (ret == 2)
 		return 0;
 	if (ret < 0)
@@ -202,7 +202,7 @@ static int snd_soc_8_8_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	if (codec->hw_write(codec->control_data, data, 2) == 2)
+	if (codec->hw_write(codec->control_data, (const char *)data, 2) == 2)
 		return 0;
 	else
 		return -EIO;
@@ -282,7 +282,7 @@ static int snd_soc_8_16_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	if (codec->hw_write(codec->control_data, data, 3) == 3)
+	if (codec->hw_write(codec->control_data, (const char *)data, 3) == 3)
 		return 0;
 	else
 		return -EIO;
@@ -487,7 +487,7 @@ static int snd_soc_16_8_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	ret = codec->hw_write(codec->control_data, data, 3);
+	ret = codec->hw_write(codec->control_data, (const char *)data, 3);
 	if (ret == 3)
 		return 0;
 	if (ret < 0)
@@ -606,7 +606,7 @@ static int snd_soc_16_16_write(struct snd_soc_codec *codec, unsigned int reg,
 		return 0;
 	}
 
-	ret = codec->hw_write(codec->control_data, data, 4);
+	ret = codec->hw_write(codec->control_data, (const char *)data, 4);
 	if (ret == 4)
 		return 0;
 	if (ret < 0)

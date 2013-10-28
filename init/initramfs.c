@@ -444,10 +444,10 @@ static char * __init unpack_to_rootfs(char *buf, unsigned len)
 			continue;
 		}
 		this_header = 0;
-		decompress = decompress_method(buf, len, &compress_name);
+		decompress = decompress_method((unsigned char *)buf, len, &compress_name);
 		if (decompress) {
-			res = decompress(buf, len, NULL, flush_buffer, NULL,
-				   &my_inptr, error);
+			res = decompress((unsigned char *)buf, len, NULL, flush_buffer, NULL,
+				   (int *)&my_inptr, error);
 			if (res)
 				error("decompressor failed");
 		} else if (compress_name) {

@@ -994,7 +994,7 @@ new_segment:
 				/* We have some space in skb head. Superb! */
 				if (copy > skb_tailroom(skb))
 					copy = skb_tailroom(skb);
-				if ((err = skb_add_data(skb, from, copy)) != 0)
+				if ((err = skb_add_data(skb, (char *)from, copy)) != 0)
 					goto do_fault;
 			} else {
 				int merge = 0;
@@ -1037,7 +1037,7 @@ new_segment:
 
 				/* Time to copy data. We are close to
 				 * the end! */
-				err = skb_copy_to_page(sk, from, skb, page,
+				err = skb_copy_to_page(sk, (char *)from, skb, page,
 						       off, copy);
 				if (err) {
 					/* If this page was new, give it to the
@@ -1162,7 +1162,7 @@ static int tcp_recv_urg(struct sock *sk, struct msghdr *msg, int len, int flags)
 
 		if (len > 0) {
 			if (!(flags & MSG_TRUNC))
-				err = memcpy_toiovec(msg->msg_iov, &c, 1);
+				err = memcpy_toiovec(msg->msg_iov, (unsigned char *)&c, 1);
 			len = 1;
 		} else
 			msg->msg_flags |= MSG_TRUNC;
